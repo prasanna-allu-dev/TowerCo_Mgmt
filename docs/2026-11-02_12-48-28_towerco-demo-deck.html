@@ -1,0 +1,944 @@
+<title>TowerCo Demo Deck</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one 16:9 slide on a cool steel ground, keyboard driven; stacks to a scroll of slides on phones. */
+:root {
+  --ground: #E9EEF1;
+  --slide: #FBFCFD;
+  --ink: #15212B;
+  --muted: #56656F;
+  --rule: #CBD5DB;
+  --accent: #0B6E99;
+  --accent-soft: #DCEBF2;
+  --ok: #2E7D4F;
+  --warn: #B86E12;
+  --full: #B23A3A;
+  --ok-soft: #E1F0E6;
+  --warn-soft: #F7EAD8;
+  --full-soft: #F5E0E0;
+  --tenant: #0F7C76;
+  --tenant-soft: #DCF0EE;
+  --shared: #C4583F;
+  --shared-soft: #F8E3DD;
+  --display: "IBM Plex Sans Condensed", "Arial Narrow", sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #0E151B; --slide: #16212A; --ink: #E6EDF1; --muted: #9AABB6; --rule: #2C3B46;
+    --accent: #5BB4DB; --accent-soft: #173444; --ok: #6CC490; --warn: #E3A653; --full: #E57C7C;
+    --ok-soft: #173A27; --warn-soft: #3D2C14; --full-soft: #3F1E1E;
+    --tenant: #4FC2B9; --tenant-soft: #143A37; --shared: #EE8D74; --shared-soft: #42231B; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #0E151B; --slide: #16212A; --ink: #E6EDF1; --muted: #9AABB6; --rule: #2C3B46;
+  --accent: #5BB4DB; --accent-soft: #173444; --ok: #6CC490; --warn: #E3A653; --full: #E57C7C;
+  --ok-soft: #173A27; --warn-soft: #3D2C14; --full-soft: #3F1E1E;
+  --tenant: #4FC2B9; --tenant-soft: #143A37; --shared: #EE8D74; --shared-soft: #42231B; color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  background: var(--ground); color: var(--ink); font-family: var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px; box-sizing: border-box;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.deck { width: min(100%, calc((100vh - 96px) * 16 / 9)); position: relative; }
+.slide {
+  display: none; aspect-ratio: 16 / 9; background: var(--slide); border: 1px solid var(--rule);
+  border-radius: 6px; container-type: inline-size; overflow: hidden; box-sizing: border-box;
+}
+.slide.active { display: block; }
+.inner { padding: 4.2cqw 5cqw 3.6cqw; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; gap: 2cqw; }
+.eyebrow { font-family: var(--mono); font-size: 1.15cqw; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1, h2 { font-family: var(--display); margin: 0; text-wrap: balance; line-height: 1.05; }
+h1 { font-size: 5.6cqw; font-weight: 700; }
+h2 { font-size: 3.3cqw; font-weight: 600; }
+p, li, td, th { font-size: 1.55cqw; line-height: 1.45; }
+p { margin: 0; max-width: 62ch; }
+.muted { color: var(--muted); }
+.mono { font-family: var(--mono); }
+code { font-family: var(--mono); font-size: .92em; background: var(--accent-soft); padding: .05em .35em; border-radius: 3px; }
+ul { margin: 0; padding-left: 1.3em; display: grid; gap: .5cqw; }
+.cols { display: grid; gap: 3cqw; grid-template-columns: 1fr 1fr; flex: 1; min-height: 0; }
+.cols3 { display: grid; gap: 2cqw; grid-template-columns: repeat(3, 1fr); }
+.cols > *, .cols3 > * { min-width: 0; }
+.label { font-family: var(--mono); font-size: 1.05cqw; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th { text-align: left; font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--rule); padding: .5cqw .8cqw .5cqw 0; font-size: 1.25cqw; text-transform: uppercase; letter-spacing: .04em; }
+td { border-bottom: 1px solid var(--rule); padding: .55cqw .8cqw .55cqw 0; vertical-align: top; }
+.pill { display: inline-block; font-family: var(--mono); font-size: 1.05cqw; padding: .15cqw .7cqw; border-radius: 99px; white-space: nowrap; }
+.built { background: var(--ok-soft); color: var(--ok); }
+.mock { background: var(--warn-soft); color: var(--warn); }
+.next { background: var(--accent-soft); color: var(--accent); }
+.foot { margin-top: auto; display: flex; justify-content: space-between; font-family: var(--mono); font-size: 1.05cqw; color: var(--muted); }
+svg text { font-family: var(--body); fill: var(--ink); }
+svg .box { fill: var(--slide); stroke: var(--rule); stroke-width: 1.5; }
+svg .box.hl { fill: var(--accent-soft); stroke: var(--accent); }
+svg .t { font-family: var(--display); font-weight: 600; font-size: 19px; }
+svg .a { font-size: 13px; fill: var(--muted); }
+svg .edge { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+svg .dash { stroke-dasharray: 5 4; }
+svg .card { font-family: var(--mono); font-size: 13px; fill: var(--accent); }
+svg .ah { fill: var(--muted); }
+svg .box.ref { stroke-dasharray: 6 4; fill: transparent; }
+svg .box.ten { fill: var(--tenant-soft); stroke: var(--tenant); }
+svg .box.sha { fill: var(--shared-soft); stroke: var(--shared); }
+.legend { display: flex; flex-wrap: wrap; gap: .8cqw 2.4cqw; font-size: 1.25cqw; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: .6cqw; }
+.sw { width: 1.6cqw; height: 1.1cqw; border-radius: 2px; border: 1.5px solid var(--muted); display: inline-block; }
+.tree { list-style: none; padding-left: 0; display: grid; gap: .55cqw; }
+.tree ul { list-style: none; padding-left: 2.2cqw; border-left: 1px solid var(--rule); margin-top: .55cqw; gap: .55cqw; }
+.tree li { font-size: 1.45cqw; }
+.tag { font-family: var(--mono); font-size: 1.05cqw; padding: .1cqw .6cqw; border-radius: 99px; }
+.tag.ten { background: var(--tenant-soft); color: var(--tenant); }
+.tag.sha { background: var(--shared-soft); color: var(--shared); }
+.prop { background: var(--warn-soft); color: var(--warn); }
+.headrow { display: flex; flex-wrap: wrap; align-items: center; gap: 1.2cqw; }
+.lanes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2.2cqw; }
+.lane { border: 1px solid var(--rule); border-radius: 4px; padding: 1.2cqw; display: grid; gap: .7cqw; align-content: start; position: relative; min-width: 0; }
+.lane:not(:last-child)::after { content: "\2192"; position: absolute; right: -1.85cqw; top: 1cqw; color: var(--muted); font-size: 1.6cqw; }
+.lane ul { padding-left: 1.1em; gap: .35cqw; }
+.lane li { font-size: 1.22cqw; line-height: 1.35; }
+.band { border: 1px dashed var(--rule); border-radius: 4px; padding: .8cqw 1.2cqw; font-size: 1.25cqw; color: var(--muted); }
+.paths { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2cqw; }
+.path { border-top: 3px solid var(--accent); padding-top: 1cqw; display: grid; gap: .8cqw; align-content: start; min-width: 0; }
+.path.hot { border-color: var(--full); } .path.warm { border-color: var(--warn); } .path.cold { border-color: var(--accent); }
+svg .st { font-size: 14px; font-weight: 600; }
+@media (max-width: 720px) {
+  .lanes, .paths { grid-template-columns: 1fr; }
+  .lane:not(:last-child)::after { content: none; }
+  .lane li, .band { font-size: 13px; }
+}
+.diagram { width: 100%; height: auto; display: block; }
+.towers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2cqw; }
+.tower { border: 1px solid var(--rule); border-radius: 4px; padding: 1.4cqw; display: grid; gap: .7cqw; }
+.bar { height: 1.1cqw; background: var(--rule); border-radius: 99px; overflow: hidden; }
+.bar > span { display: block; height: 100%; border-radius: 99px; }
+.big { font-family: var(--display); font-size: 3.4cqw; font-weight: 700; font-variant-numeric: tabular-nums; }
+.hbars { display: grid; gap: 1.1cqw; }
+.hrow { display: grid; grid-template-columns: 8cqw 1fr 9cqw; align-items: center; gap: 1.2cqw; font-size: 1.5cqw; font-variant-numeric: tabular-nums; }
+.hrow .bar { height: 1.8cqw; border-radius: 3px; }
+.hrow .bar > span { background: var(--accent); border-radius: 3px; }
+.steps { counter-reset: s; list-style: none; padding: 0; display: grid; gap: .9cqw; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 2.6cqw 1fr; gap: 1cqw; }
+.steps li::before { content: counter(s); font-family: var(--mono); color: var(--accent); font-weight: 500; }
+.cmd { font-family: var(--mono); font-size: 1.3cqw; background: var(--ground); border: 1px solid var(--rule); border-radius: 4px; padding: .8cqw 1.1cqw; white-space: pre-wrap; }
+.title-slide .inner { justify-content: center; gap: 2.4cqw; background:
+  repeating-radial-gradient(circle at 92% 18%, transparent 0 3.2cqw, var(--accent-soft) 3.2cqw 3.35cqw); }
+.notes { display: none; }
+.controls { width: min(100%, calc((100vh - 96px) * 16 / 9)); display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 13px; color: var(--muted); }
+.controls button { font: inherit; color: var(--ink); background: var(--slide); border: 1px solid var(--rule); border-radius: 4px; padding: 6px 12px; cursor: pointer; }
+.controls button:hover { border-color: var(--accent); }
+.controls button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.controls .count { margin-left: auto; font-variant-numeric: tabular-nums; }
+.notes-panel { width: min(100%, calc((100vh - 96px) * 16 / 9)); box-sizing: border-box; background: var(--slide); border: 1px solid var(--rule); border-radius: 6px; padding: 12px 16px; font-size: 14px; line-height: 1.5; }
+.notes-panel strong { font-family: var(--mono); font-size: 12px; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; }
+@media (max-width: 720px) {
+  .deck { width: 100%; display: grid; gap: 14px; }
+  .slide { display: block; aspect-ratio: auto; }
+  .inner { padding: 22px 18px; gap: 14px; }
+  .eyebrow, .label, .pill, .foot, th { font-size: 11px; }
+  h1 { font-size: 32px; } h2 { font-size: 22px; }
+  p, li, td, .hrow, .cmd { font-size: 14px; }
+  .big { font-size: 26px; }
+  .cols, .cols3, .towers { grid-template-columns: 1fr; }
+  .hrow { grid-template-columns: 70px 1fr 74px; }
+  .bar, .hrow .bar { height: 10px; }
+  .steps li { grid-template-columns: 20px 1fr; }
+  .table-wrap { overflow-x: auto; }
+  .controls, .notes-panel { display: none; }
+}
+@media (prefers-reduced-motion: no-preference) { .slide.active { animation: in .25s ease-out; } }
+@keyframes in { from { opacity: .4; } to { opacity: 1; } }
+</style>
+
+<div class="deck" id="deck">
+
+<!-- 1 -->
+<section class="slide title-slide">
+  <div class="inner">
+    <div class="eyebrow">Full Stack Practical Exercise · Phase 1 demo</div>
+    <h1>TowerCo Tower<br>Management System</h1>
+    <p class="muted">Track tower sites across four countries, lease slots to mobile network operators, and see capacity at a glance. React, .NET 10 and SQLite.</p>
+    <div class="foot"><span>2 November 2026</span><span>Fictional data throughout</span></div>
+  </div>
+  <aside class="notes">Open with the one-line purpose. Everything shown uses fictional operators and sites. Say up front that this is a phase-based build and the deck shows what is built today versus what is next.</aside>
+</section>
+
+<!-- 2 -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">Context</div>
+    <h2>Four people, four questions</h2>
+    <div class="table-wrap"><table>
+      <tr><th>Persona</th><th>Needs to</th><th>Use case</th><th>Phase 1 coverage</th></tr>
+      <tr><td>Any user</td><td>Search and filter sites, open one view with everything about a site</td><td class="mono">UC3</td><td>Full</td></tr>
+      <tr><td>Commercial user</td><td>Add an operator as tenant and see if the tower has room</td><td class="mono">UC2</td><td>Full</td></tr>
+      <tr><td>Operations user</td><td>Register a site and its tower, update it over time</td><td class="mono">UC1</td><td>Thin slice: register only</td></tr>
+      <tr><td>Manager</td><td>See where sites are and how well they are used</td><td class="mono">UC4</td><td>Thin slice: KPIs and utilisation by country</td></tr>
+    </table></div>
+    <p class="muted">Focus is the commercial user and site browsing. Thin slices of UC1 and UC4 make sure the demo touches all four use cases.</p>
+  </div>
+  <aside class="notes">TowerCo builds and operates towers and leases space to MNOs. The brief asks for a demo covering all four use cases, so UC1 and UC4 get thin slices rather than being dropped. Edit (UC1) and the map (UC4) are later phases.</aside>
+</section>
+
+<!-- 2b -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">Goals</div>
+    <h2>Five goals and how we are meeting each</h2>
+    <div class="table-wrap"><table>
+      <tr><th>Goal (from brief)</th><th>How we achieve it</th><th>Status today</th></tr>
+      <tr><td>Find any site fast <span class="mono muted">UC3</span></td><td>Filter by country, status and text; one site view with tower, capacity, tenancies and equipment</td><td><span class="pill built">Built · real API</span></td></tr>
+      <tr><td>Lease slots safely <span class="mono muted">UC2</span></td><td>Capacity derived from active tenancies; full, duplicate or inactive site rejected with a named 409</td><td><span class="pill built">Built · real API</span></td></tr>
+      <tr><td>Keep portfolio data accurate <span class="mono muted">UC1</span></td><td>Three-step register wizard; unique site code, new sites start as Planned</td><td><span class="pill built">Built · real API</span></td></tr>
+      <tr><td>See the portfolio at a glance <span class="mono muted">UC4</span></td><td>Dashboard: KPI tiles, utilisation by country, sites by status, renewals, critical indicators</td><td><span class="pill built">Built · real API</span></td></tr>
+      <tr><td>Code you can explain and change live</td><td>Six-project Clean Architecture, custom exceptions to ProblemDetails, no hardcoded values, tests</td><td><span class="pill built">Built · 108 tests</span></td></tr>
+    </table></div>
+    <div class="foot"><span>Status as of 2 Nov 2026</span><span>Source: CLAUDE.md progress log</span></div>
+  </div>
+  <aside class="notes">Five goals: the four use cases from the brief plus the session deliverable of explainable, changeable code. Every screen now calls the real API; the typed mock stays available behind one environment flag for offline UI work.</aside>
+</section>
+
+<!-- 3 -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">Domain model</div>
+    <h2>Six entities, capacity is derived</h2>
+    <svg class="diagram" viewBox="0 0 960 380" role="img" aria-label="Domain model: Site has one Tower; Tower has many Tenancies and many Equipment; Tenancy belongs to one Operator; Equipment has one EquipmentType and belongs to one Tenancy">
+      <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+      <rect class="box" x="20" y="30" width="190" height="130" rx="4"/>
+      <text class="t" x="36" y="62">Site</text>
+      <text class="a" x="36" y="88">SiteCode, Name, Status</text>
+      <text class="a" x="36" y="108">Location (value object)</text>
+      <text class="a" x="36" y="128">country, city, lat, long</text>
+      <rect class="box hl" x="270" y="30" width="190" height="130" rx="4"/>
+      <text class="t" x="286" y="62">Tower</text>
+      <text class="a" x="286" y="88">TowerType, HeightMetres</text>
+      <text class="a" x="286" y="108">MaxTenants (slots)</text>
+      <text class="a" x="286" y="128">capacity methods</text>
+      <rect class="box" x="520" y="30" width="190" height="130" rx="4"/>
+      <text class="t" x="536" y="62">Tenancy</text>
+      <text class="a" x="536" y="88">StartDate, EndDate?</text>
+      <text class="a" x="536" y="108">MonthlyRent (Money)</text>
+      <text class="a" x="536" y="128">IsActiveOn(date)</text>
+      <rect class="box" x="770" y="30" width="170" height="130" rx="4"/>
+      <text class="t" x="786" y="62">Operator</text>
+      <text class="a" x="786" y="88">Name, CountryCode</text>
+      <rect class="box" x="520" y="230" width="190" height="130" rx="4"/>
+      <text class="t" x="536" y="262">Equipment</text>
+      <text class="a" x="536" y="288">SerialNumber, Status</text>
+      <text class="a" x="536" y="308">MountHeightMetres?</text>
+      <text class="a" x="536" y="328">TenancyId = tenant owner</text>
+      <rect class="box" x="770" y="230" width="170" height="130" rx="4"/>
+      <text class="t" x="786" y="262">EquipmentType</text>
+      <text class="a" x="786" y="288">Name, Category</text>
+      <text class="a" x="786" y="308">catalogue data</text>
+      <path class="edge" d="M210,95 H270" marker-end="url(#arr)"/><text class="card" x="222" y="85">1 : 1</text>
+      <path class="edge" d="M460,95 H520" marker-end="url(#arr)"/><text class="card" x="472" y="85">1 : *</text>
+      <path class="edge" d="M710,95 H770" marker-end="url(#arr)"/><text class="card" x="722" y="85">* : 1</text>
+      <path class="edge" d="M365,160 V295 H520" marker-end="url(#arr)"/><text class="card" x="380" y="285">1 : *</text>
+      <path class="edge" d="M615,160 V230" marker-end="url(#arr)"/><text class="card" x="625" y="202">1 : *</text>
+      <path class="edge" d="M710,295 H770" marker-end="url(#arr)"/><text class="card" x="722" y="285">* : 1</text>
+    </svg>
+    <p class="muted">Every equipment item belongs to a tenant through its tenancy (for example a 5G antenna or microwave dish). TowerCo does not own equipment in this model. New equipment types are rows, not code.</p>
+  </div>
+  <aside class="notes">Walk left to right. One tower per site is a deliberate simplification. Site location and rent are value objects (SiteLocation, Money), mapped as EF complex types. Capacity numbers are never stored, so they cannot drift from the tenancies.</aside>
+</section>
+
+<!-- 3a -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">Site hierarchy</div>
+    <h2>From country down to each tenant's kit</h2>
+    <svg class="diagram" style="max-height:29cqw" viewBox="0 0 960 330" role="img" aria-label="Site hierarchy: Country groups many Sites; each Site has one Tower; a Tower has many Tenancies; each Tenancy belongs to one Operator and has many equipment items; each equipment item points to one Equipment type">
+      <defs><marker id="arr3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+      <rect class="box ref" x="370" y="4" width="220" height="46" rx="4"/>
+      <text class="t" x="386" y="33">Country</text><text class="a" x="478" y="33">IN, ZA, KE, NG</text>
+      <rect class="box" x="370" y="74" width="220" height="46" rx="4"/>
+      <text class="t" x="386" y="103">Site</text><text class="a" x="440" y="103">location, status</text>
+      <rect class="box hl" x="370" y="144" width="220" height="46" rx="4"/>
+      <text class="t" x="386" y="173">Tower</text><text class="a" x="450" y="173">type, height, slots</text>
+      <rect class="box ref" x="10" y="214" width="170" height="46" rx="4"/>
+      <text class="t" x="26" y="243">Operator</text>
+      <rect class="box" x="230" y="214" width="220" height="46" rx="4"/>
+      <text class="t" x="246" y="243">Tenancy</text><text class="a" x="326" y="243">lease, 1 slot</text>
+      <rect class="box ten" x="230" y="284" width="220" height="42" rx="4"/>
+      <text class="t" x="246" y="311">Tenant equipment</text>
+      <rect class="box ref" x="560" y="284" width="240" height="42" rx="4"/>
+      <text class="t" x="576" y="311">Equipment type</text><text class="a" x="706" y="311">catalogue</text>
+      <path class="edge dash" d="M480,50 V74" marker-end="url(#arr3)"/><text class="card" x="492" y="67">1 : *</text>
+      <path class="edge" d="M480,120 V144" marker-end="url(#arr3)"/><text class="card" x="492" y="137">1 : 1</text>
+      <path class="edge" d="M420,190 L360,214" marker-end="url(#arr3)"/><text class="card" x="336" y="204">1 : *</text>
+      <path class="edge dash" d="M230,237 H180" marker-end="url(#arr3)"/><text class="card" x="186" y="230">* : 1</text>
+      <path class="edge" d="M340,260 V284" marker-end="url(#arr3)"/><text class="card" x="352" y="277">1 : *</text>
+      <path class="edge dash" d="M450,305 H560" marker-end="url(#arr3)"/><text class="card" x="484" y="298">* : 1</text>
+    </svg>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--tenant-soft);border-color:var(--tenant)"></i>Tenant owned equipment</span>
+      <span><i class="sw"></i>Solid: physical asset or record</span>
+      <span><i class="sw" style="border-style:dashed"></i>Dashed: reference data or grouping</span>
+    </div>
+  </div>
+  <aside class="notes">Ownership runs Site, Tower, Tenancy, then Equipment. Country is a grouping only (CountryCode on Site), not a table. Operator and Equipment type are reference data reused across towers. All equipment belongs to a tenant through its tenancy; TowerCo owns no equipment in this model. Equipment is display only; capacity stays slot based. One tower per site is a single relationship, so multi-tower later changes only that link.</aside>
+</section>
+
+<!-- 3b -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">Site hierarchy · worked example</div>
+    <h2>One seeded site, end to end</h2>
+    <div class="cols">
+      <ul class="tree">
+        <li><strong>IN</strong> <span class="muted">India</span>
+          <ul class="tree">
+            <li><span class="mono">IN-DEL-0002</span> Dwarka Sector 12 <span class="pill built">Active</span>
+              <ul class="tree">
+                <li>Tower: Monopole, 30 m, 3 slots <span class="muted">(2 used, 66.7%)</span>
+                  <ul class="tree">
+                    <li>Tenancy: Aurora Mobile<br><span class="tag ten">5G Active Antenna (AAU)</span> <span class="tag ten">Microwave Dish</span></li>
+                    <li>Tenancy: Bluewave Telecom<br><span class="tag ten">4G Remote Radio Unit</span> <span class="tag ten">Microwave Dish</span></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+      <ul>
+        <li>Operator and equipment type are reference data, reused across towers.</li>
+        <li>Every equipment item belongs to one tenancy, so its owner is always an operator.</li>
+        <li>Equipment is shown for information; capacity stays slot based.</li>
+        <li>When a tenancy ends, its equipment is marked Removed.</li>
+      </ul>
+    </div>
+    <div class="foot"><span>Seed data, fictional</span><span>SeedCatalogue.cs, SeedData.cs</span></div>
+  </div>
+  <aside class="notes">This is the real seeded Delhi site, so it matches what the app and database show. It has one free slot, which links straight to the capacity slide that follows.</aside>
+</section>
+
+<!-- 4 -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">Capacity model</div>
+    <h2>Slots, counted from active tenancies</h2>
+    <p><code>AvailableSlots = MaxTenants − active tenancies</code> &nbsp; <code>Utilisation = active ÷ MaxTenants × 100</code>. A tenancy is active when it has no end date or ends on or after today.</p>
+    <div class="towers">
+      <div class="tower">
+        <span class="label">IN-MUM-0001 · Rooftop</span>
+        <span class="big">3 of 3</span>
+        <div class="bar"><span style="width:100%;background:var(--full)"></span></div>
+        <span class="pill" style="background:var(--full-soft);color:var(--full)">Full · 100.0%</span>
+        <span class="muted" style="font-size:1.3cqw">Add-tenant form disabled</span>
+      </div>
+      <div class="tower">
+        <span class="label">IN-DEL-0002 · Monopole</span>
+        <span class="big">2 of 3</span>
+        <div class="bar"><span style="width:66.7%;background:var(--warn)"></span></div>
+        <span class="pill" style="background:var(--warn-soft);color:var(--warn)">1 slot free · 66.7%</span>
+        <span class="muted" style="font-size:1.3cqw">Can take one more operator</span>
+      </div>
+      <div class="tower">
+        <span class="label">IN-BLR-0003 · Lattice</span>
+        <span class="big">1 of 4</span>
+        <div class="bar"><span style="width:25%;background:var(--ok)"></span></div>
+        <span class="pill" style="background:var(--ok-soft);color:var(--ok)">3 slots free · 25.0%</span>
+        <span class="muted" style="font-size:1.3cqw">An ended lease (31 Dec 2025) frees its slot</span>
+      </div>
+    </div>
+    <p class="muted">Why slots: simple and explainable, and it answers "is there room for another tenant?". Structural load (weight, wind) is a future extension.</p>
+    <div class="foot"><span>Seed data, evaluated on 2 Nov 2026</span><span>Tower.cs</span></div>
+  </div>
+  <aside class="notes">These three are real seeded towers. Point out the Bengaluru case: two tenancies on record but only one counts, because the Aurora lease ended. That is the IsActiveOn rule doing the work.</aside>
+</section>
+
+<!-- 5 -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">Business rules</div>
+    <h2>Eight rules, each with a named exception</h2>
+    <div class="table-wrap"><table>
+      <tr><th>#</th><th>Rule</th><th>Result when broken</th><th>Status</th></tr>
+      <tr><td class="mono">1</td><td>Tenant only when the tower has a free slot</td><td class="mono">TowerCapacityExceeded · 409</td><td><span class="pill built">Built in domain</span></td></tr>
+      <tr><td class="mono">2</td><td>One active tenancy per operator per tower</td><td class="mono">DuplicateTenancy · 409</td><td><span class="pill built">Built in domain</span></td></tr>
+      <tr><td class="mono">3</td><td>Tenants only on Active sites</td><td class="mono">SiteNotActive · 409</td><td><span class="pill built">Built in domain</span></td></tr>
+      <tr><td class="mono">4</td><td>Unknown site, tower or operator</td><td class="mono">NotFound · 404</td><td><span class="pill built">Exception and mapping built</span></td></tr>
+      <tr><td class="mono">5</td><td>Site code is unique</td><td class="mono">DuplicateSiteCode · 409</td><td><span class="pill built">Unique index built</span></td></tr>
+      <tr><td class="mono">6</td><td>Height and slots must be positive</td><td class="mono">Validation · 400</td><td><span class="pill built">Built (Guard)</span></td></tr>
+      <tr><td class="mono">7</td><td>New sites start as Planned</td><td class="mono">n/a</td><td><span class="pill next">Next</span></td></tr>
+      <tr><td class="mono">8</td><td>Portfolio summary skips decommissioned sites</td><td class="mono">n/a</td><td><span class="pill next">Next</span></td></tr>
+    </table></div>
+    <p class="muted">All domain exceptions go through one handler that returns RFC 7807 ProblemDetails, so the UI gets a clear message without per-controller code.</p>
+  </div>
+  <aside class="notes">Be clear about status. Rules 1 to 3 are enforced inside Tower.AddTenancy; the API endpoint that calls it is the next step. The unique index for rule 5 exists in the database; the friendly 409 exception comes with the register-site service. One extra rule already exists: one tower per site (TowerAlreadyExistsException).</aside>
+</section>
+
+<!-- 6 -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">Architecture</div>
+    <h2>Clean Architecture, dependencies point inward</h2>
+    <svg class="diagram" viewBox="0 0 960 360" role="img" aria-label="Architecture: React client calls the ASP.NET Core server over HTTP. Server depends on Application. Application depends on Domain. Infrastructure depends on Application and Domain and talks to SQLite through EF Core.">
+      <defs><marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+      <rect class="box" x="10" y="40" width="180" height="120" rx="4"/>
+      <text class="t" x="26" y="72">React client</text><text class="a" x="26" y="98">Vite + TypeScript</text><text class="a" x="26" y="118">typed API contracts</text><text class="a" x="26" y="138">mock or real by env flag</text>
+      <rect class="box" x="250" y="40" width="180" height="120" rx="4"/>
+      <text class="t" x="266" y="72">Server</text><text class="a" x="266" y="98">thin controllers</text><text class="a" x="266" y="118">ProblemDetails handler</text><text class="a" x="266" y="138">DI wiring, config</text>
+      <rect class="box" x="490" y="40" width="180" height="120" rx="4"/>
+      <text class="t" x="506" y="72">Application</text><text class="a" x="506" y="98">use-case services</text><text class="a" x="506" y="118">DTOs, interfaces</text>
+      <rect class="box hl" x="730" y="40" width="210" height="120" rx="4"/>
+      <text class="t" x="746" y="72">Domain</text><text class="a" x="746" y="98">entities, value objects</text><text class="a" x="746" y="118">rules, exceptions</text><text class="a" x="746" y="138">no dependencies</text>
+      <rect class="box" x="490" y="240" width="180" height="100" rx="4"/>
+      <text class="t" x="506" y="272">Infrastructure</text><text class="a" x="506" y="298">EF Core DbContext</text><text class="a" x="506" y="318">configurations, seed</text>
+      <rect class="box" x="760" y="250" width="180" height="80" rx="4"/>
+      <text class="t" x="776" y="282">SQLite</text><text class="a" x="776" y="306">towerco.db file</text>
+      <path class="edge" d="M190,100 H250" marker-end="url(#arr2)"/><text class="card" x="196" y="90">HTTP</text>
+      <path class="edge" d="M430,100 H490" marker-end="url(#arr2)"/>
+      <path class="edge" d="M670,100 H730" marker-end="url(#arr2)"/>
+      <path class="edge" d="M580,240 V160" marker-end="url(#arr2)"/>
+      <path class="edge" d="M640,240 L780,160" marker-end="url(#arr2)"/>
+      <path class="edge" d="M670,290 H760" marker-end="url(#arr2)"/><text class="card" x="682" y="280">EF Core</text>
+      <path class="edge dash" d="M340,160 V290 H490" marker-end="url(#arr2)"/><text class="card" x="350" y="280">wires at startup</text>
+    </svg>
+    <p class="muted">Arrows show "depends on". Business rules live in Domain and know nothing about EF, HTTP or React, so they are tested with plain unit tests.</p>
+  </div>
+  <aside class="notes">Five .NET projects: Domain, Application, Infrastructure, Server, Tests. Server references Infrastructure only to register it at startup. Swapping SQLite for Azure SQL is a connection string and provider change inside Infrastructure.</aside>
+</section>
+
+<!-- 6-ctx -->
+<section class="slide">
+  <div class="inner">
+    <div class="headrow"><div class="eyebrow">Enterprise context</div><span class="pill prop">Proposed, not approved</span></div>
+    <h2>TowerCo platform in its wider landscape</h2>
+    <svg class="diagram" style="max-height:30cqw" viewBox="0 0 960 330" role="img" aria-label="Context diagram: the TowerCo platform in the centre, connected to mobile network operators, field technicians and contractors, TowerCo staff, finance ERP, ground landlords, energy and grid providers, regulators, and the analytics platform">
+      <defs><marker id="arr5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+      <rect class="box hl" x="350" y="120" width="260" height="90" rx="6"/>
+      <text class="t" x="372" y="155">TowerCo platform</text>
+      <text class="a" x="372" y="180">portfolio, commercial,</text>
+      <text class="a" x="372" y="198">monitoring, field service</text>
+      <rect class="box" x="10" y="10" width="230" height="62" rx="4"/><text class="t" x="24" y="36">Mobile operators</text><text class="a" x="24" y="58">lease requests, outage notices</text>
+      <rect class="box" x="10" y="134" width="230" height="62" rx="4"/><text class="t" x="24" y="160">TowerCo staff</text><text class="a" x="24" y="182">operations, commercial, managers</text>
+      <rect class="box" x="10" y="258" width="230" height="62" rx="4"/><text class="t" x="24" y="284">Field technicians</text><text class="a" x="24" y="306">employees and contractors</text>
+      <rect class="box" x="720" y="10" width="230" height="62" rx="4"/><text class="t" x="734" y="36">Finance ERP</text><text class="a" x="734" y="58">rent invoicing, ground rent</text>
+      <rect class="box" x="720" y="134" width="230" height="62" rx="4"/><text class="t" x="734" y="160">Analytics platform</text><text class="a" x="734" y="182">reporting, forecasting</text>
+      <rect class="box" x="720" y="258" width="230" height="62" rx="4"/><text class="t" x="734" y="284">Regulators</text><text class="a" x="734" y="306">aviation light compliance</text>
+      <rect class="box ref" x="300" y="258" width="170" height="62" rx="4"/><text class="t" x="314" y="284">Landlords</text><text class="a" x="314" y="306">ground leases</text>
+      <rect class="box ref" x="490" y="258" width="170" height="62" rx="4"/><text class="t" x="504" y="284">Energy and grid</text><text class="a" x="504" y="306">outages, tariffs</text>
+      <rect class="box ref" x="380" y="10" width="200" height="62" rx="4"/><text class="t" x="394" y="36">Tower sensors</text><text class="a" x="394" y="58">via site gateways</text>
+      <path class="edge" d="M240,41 L350,135" marker-end="url(#arr5)"/>
+      <path class="edge" d="M240,165 H350" marker-end="url(#arr5)"/>
+      <path class="edge" d="M240,289 L350,200" marker-end="url(#arr5)"/>
+      <path class="edge" d="M480,72 V120" marker-end="url(#arr5)"/>
+      <path class="edge" d="M610,135 L720,41" marker-end="url(#arr5)"/>
+      <path class="edge" d="M610,165 H720" marker-end="url(#arr5)"/>
+      <path class="edge" d="M610,200 L720,289" marker-end="url(#arr5)"/>
+      <path class="edge dash" d="M400,258 L440,210" marker-end="url(#arr5)"/>
+      <path class="edge dash" d="M560,258 L520,210" marker-end="url(#arr5)"/>
+    </svg>
+    <p class="muted">Phase 1 covers TowerCo staff only. Each other connection is a separate integration with its own contract; dashed boxes are optional data feeds.</p>
+  </div>
+  <aside class="notes">Zoom out before zooming in. A tower company's system rarely lives alone: operators want an API for lease requests and outage notices, finance needs tenancies to become invoices, and regulators may need proof that aviation lights work. Naming these early stops the core model from being designed around one screen. All of these are proposals for discussion.</aside>
+</section>
+
+<!-- 6-bc -->
+<section class="slide">
+  <div class="inner">
+    <div class="headrow"><div class="eyebrow">Bounded contexts</div><span class="pill prop">Proposed, not approved</span></div>
+    <h2>Six business areas, one platform</h2>
+    <div class="table-wrap"><table>
+      <tr><th>Context</th><th>Owns</th><th>Talks to others by</th><th>Status</th></tr>
+      <tr><td><strong>Portfolio</strong></td><td>Sites, towers, equipment catalogue</td><td>Site and tower IDs, <code>SiteRegistered</code> event</td><td><span class="pill built">Phase 1</span></td></tr>
+      <tr><td><strong>Commercial</strong></td><td>Tenancies, capacity, rent; later ground leases and billing</td><td><code>TenancyStarted</code>, <code>TenancyEnded</code> events to finance</td><td><span class="pill built">Phase 1</span></td></tr>
+      <tr><td><strong>Monitoring</strong></td><td>Sensors, readings, alarm rules, alarms</td><td><code>AlarmRaised</code>, <code>AlarmCleared</code> on Service Bus</td><td><span class="pill prop">Proposed</span></td></tr>
+      <tr><td><strong>Field service</strong></td><td>Work orders, technicians, SLAs, site visits</td><td>Consumes alarms; publishes <code>WorkOrderClosed</code></td><td><span class="pill prop">Proposed</span></td></tr>
+      <tr><td><strong>Partner access</strong></td><td>Operator portal and API, notifications</td><td>API Management in front of Commercial and Monitoring</td><td><span class="pill prop">Proposed</span></td></tr>
+      <tr><td><strong>Insights</strong></td><td>Reporting, utilisation and uptime trends</td><td>Reads from the data lake, never from live tables</td><td><span class="pill prop">Proposed</span></td></tr>
+    </table></div>
+    <p class="muted">Start as one deployable (modular monolith) with a folder per context. Split a context out only when its load, release pace or team needs it. Monitoring ingestion is split from day one because sensor traffic scales differently.</p>
+  </div>
+  <aside class="notes">This is how the system grows without becoming a big ball of mud. Contexts share IDs and events, not tables. The event names are proposed. Ingestion is the one piece that runs separately from the start, because sensor traffic is bursty and continuous while the web app is user driven.</aside>
+</section>
+
+<!-- 6a -->
+<section class="slide">
+  <div class="inner">
+    <div class="headrow"><div class="eyebrow">Target architecture</div><span class="pill prop">Proposed, not approved</span></div>
+    <h2>From tower sensors to the people who act</h2>
+    <div class="lanes">
+      <div class="lane">
+        <span class="label">Field</span>
+        <ul>
+          <li>Tower sensors: power meter, battery monitor, generator fuel and status, shelter temperature, door contact, aviation obstruction light, tilt and vibration</li>
+          <li>Site gateway, MQTT over cellular</li>
+          <li>Telemetry simulator for the demo</li>
+        </ul>
+      </div>
+      <div class="lane">
+        <span class="label">Ingestion</span>
+        <ul>
+          <li>Azure IoT Hub with Device Provisioning Service</li>
+          <li>Ingestion Functions: validate, enrich, roll up, alarm rules</li>
+          <li>Azure Cosmos DB for sensor readings and roll-ups</li>
+          <li>Service Bus topic <code>tower-alarms</code></li>
+          <li>Raw archive in Data Lake via change feed</li>
+        </ul>
+      </div>
+      <div class="lane">
+        <span class="label">Core</span>
+        <ul>
+          <li>TowerCo API <span class="pill built">built</span><br>modules: Portfolio, Commercial, Monitoring, Work orders</li>
+          <li>Alarm and work order worker</li>
+          <li>Business database <span class="pill built">built</span><br>SQLite now, Azure SQL later</li>
+          <li>API Management for the operator partner API</li>
+          <li>Blob storage for job photos</li>
+        </ul>
+      </div>
+      <div class="lane">
+        <span class="label">People</span>
+        <ul>
+          <li>React web app <span class="pill built">built</span></li>
+          <li>SignalR live updates</li>
+          <li>Technician PWA</li>
+          <li>Operator notifications by email or webhook</li>
+        </ul>
+      </div>
+    </div>
+    <div class="band">Across all lanes: Entra ID roles, Key Vault, Application Insights, Bicep with GitHub Actions</div>
+    <div class="foot"><span>Only items marked "built" exist today (Phase 1)</span><span>CLAUDE.md section 6.2</span></div>
+  </div>
+  <aside class="notes">Read left to right: a reading leaves the tower, is processed in Azure, lands in our API, and reaches a person. Only the API, web app and database exist today. Phases 5 and 6 need no Azure: a simulator posts readings to the API and an in-process queue stands in for Service Bus behind the same interface.</aside>
+</section>
+
+<!-- 6b -->
+<section class="slide">
+  <div class="inner">
+    <div class="headrow"><div class="eyebrow">Telemetry</div><span class="pill prop">Proposed, not approved</span></div>
+    <h2>One reading, three paths</h2>
+    <div class="paths">
+      <div class="path hot">
+        <span class="label">Hot · seconds</span>
+        <p><strong>Alarms.</strong> Alarm rules fire and publish to Service Bus.</p>
+        <p class="muted">One active alarm per tower and sensor, held in a Cosmos DB <code>alarm-state</code> item with an ETag check, so a flapping sensor does not flood the queue.</p>
+      </div>
+      <div class="path warm">
+        <span class="label">Warm · minutes to weeks</span>
+        <p><strong>Raw readings and per-minute roll-ups in Azure Cosmos DB.</strong></p>
+        <p class="muted">Partitioned by tower, then sensor, then day. Autoscale throughput, and a time to live from configuration keeps containers lean.</p>
+      </div>
+      <div class="path cold">
+        <span class="label">Cold · long term</span>
+        <p><strong>Every raw reading in Data Lake</strong>, fed from the Cosmos DB change feed.</p>
+        <p class="muted">Audit, replay of new alarm rules over past data, and analytics.</p>
+      </div>
+    </div>
+    <p class="muted">Sensor data lives in Cosmos DB; business data (sites, tenancies, work orders) stays relational in SQLite now, Azure SQL later. Alarm rules live in Domain and are reused by the ingestion Function. Thresholds come from configuration.</p>
+  </div>
+  <aside class="notes">Why Cosmos DB for sensor data: write-heavy, append-only, read by tower and time range, and it must scale out as towers and sensors grow. A hierarchical partition key (tower, sensor, day) spreads writes and keeps "this tower, last 30 days" queries inside one partition prefix. Time to live removes old raw items automatically; the change feed copies everything to the data lake first. Throughput and retention values are configuration, not decided yet.</aside>
+</section>
+
+<!-- 6-fn -->
+<section class="slide">
+  <div class="inner">
+    <div class="headrow"><div class="eyebrow">Sensor data collection</div><span class="pill prop">Proposed, not approved</span></div>
+    <h2>Azure Functions in <code style="font-size:.8em">TowerCo.Ingestion</code></h2>
+    <div class="lanes" style="grid-template-columns: 1fr 2fr 1.2fr">
+      <div class="lane">
+        <span class="label">Trigger</span>
+        <ul>
+          <li>Azure IoT Hub, read through its Event Hubs compatible endpoint</li>
+          <li>Batches per partition, checkpointed, so a restart resumes where it stopped</li>
+          <li>Gateways enrolled through Device Provisioning Service with per-device certificates</li>
+        </ul>
+      </div>
+      <div class="lane">
+        <span class="label"><code>TelemetryIngest</code> function, per batch</span>
+        <ol class="steps" style="gap:.6cqw">
+          <li><span><strong>Validate</strong> schema and units; bad messages go to a dead-letter container with the reason</span></li>
+          <li><span><strong>Enrich</strong> with tower and sensor from the sensor registry (cached)</span></li>
+          <li><span><strong>Store raw</strong> reading in Cosmos DB, keyed by message ID so a retry does not duplicate</span></li>
+          <li><span><strong>Roll up</strong> per tower, sensor and minute with a patch increment, so split or late batches still add up</span></li>
+          <li><span><strong>Evaluate alarm rules</strong> from Domain; a new or cleared alarm updates <code>alarm-state</code> and publishes to Service Bus</span></li>
+        </ol>
+      </div>
+      <div class="lane">
+        <span class="label">Outputs</span>
+        <ul>
+          <li>Cosmos DB <code>readings</code> and <code>rollups</code></li>
+          <li>Cosmos DB <code>alarm-state</code></li>
+          <li>Service Bus <code>tower-alarms</code></li>
+          <li>Dead-letter container</li>
+        </ul>
+      </div>
+    </div>
+    <div class="cols3">
+      <div class="band"><strong>Archive</strong> function: Cosmos DB change feed trigger, writes every raw reading to Data Lake</div>
+      <div class="band"><strong>Heartbeat</strong> function: timer; a gateway silent longer than the configured window raises "communication lost"</div>
+      <div class="band"><strong>Simulator</strong> function: timer, sends readings for seeded towers such as IN-DEL-0002; demo only</div>
+    </div>
+  </div>
+  <aside class="notes">One ingestion app, four functions, each with one job. Scaling follows IoT Hub partitions, so more towers means more parallel batches without code changes. The function uses managed identity for Cosmos DB, Service Bus and Key Vault, so there are no connection secrets in config. Alarm rules are the same Domain classes the API uses, shipped as a shared library. Hosting plan is a Phase 7 choice: Flex Consumption or Premium if private networking is required.</aside>
+</section>
+
+<!-- 6c -->
+<section class="slide">
+  <div class="inner">
+    <div class="headrow"><div class="eyebrow">Work order lifecycle</div><span class="pill prop">Proposed, not approved</span></div>
+    <h2>From alarm to closed job</h2>
+    <svg class="diagram" style="max-height:21cqw" viewBox="0 0 960 230" role="img" aria-label="Work order states in order: Alarm raised, Open, Triaged, Assigned, In progress, Completed, Verified, Closed. Side paths: Cancelled from Open or Triaged, Escalated on SLA breach, Reopened when verification fails after Completed.">
+      <defs><marker id="arr4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+      <rect class="box ref" x="4" y="20" width="104" height="44" rx="4"/><text class="st" x="16" y="47">Alarm raised</text>
+      <rect class="box" x="124" y="20" width="104" height="44" rx="4"/><text class="st" x="157" y="47">Open</text>
+      <rect class="box" x="244" y="20" width="104" height="44" rx="4"/><text class="st" x="268" y="47">Triaged</text>
+      <rect class="box" x="364" y="20" width="104" height="44" rx="4"/><text class="st" x="384" y="47">Assigned</text>
+      <rect class="box" x="484" y="20" width="104" height="44" rx="4"/><text class="st" x="496" y="47">In progress</text>
+      <rect class="box" x="604" y="20" width="104" height="44" rx="4"/><text class="st" x="616" y="47">Completed</text>
+      <rect class="box" x="724" y="20" width="104" height="44" rx="4"/><text class="st" x="745" y="47">Verified</text>
+      <rect class="box hl" x="844" y="20" width="104" height="44" rx="4"/><text class="st" x="872" y="47">Closed</text>
+      <path class="edge" d="M108,42 H124" marker-end="url(#arr4)"/>
+      <path class="edge" d="M228,42 H244" marker-end="url(#arr4)"/>
+      <path class="edge" d="M348,42 H364" marker-end="url(#arr4)"/>
+      <path class="edge" d="M468,42 H484" marker-end="url(#arr4)"/>
+      <path class="edge" d="M588,42 H604" marker-end="url(#arr4)"/>
+      <path class="edge" d="M708,42 H724" marker-end="url(#arr4)"/>
+      <path class="edge" d="M828,42 H844" marker-end="url(#arr4)"/>
+      <rect class="box sha" x="184" y="160" width="104" height="44" rx="4"/><text class="st" x="203" y="187">Cancelled</text>
+      <path class="edge dash" d="M176,64 V120 H220 V160" marker-end="url(#arr4)"/>
+      <path class="edge dash" d="M296,64 V120 H252 V160" marker-end="url(#arr4)"/>
+      <text class="a" x="300" y="140">with reason</text>
+      <rect class="box sha" x="444" y="160" width="104" height="44" rx="4"/><text class="st" x="461" y="187">Escalated</text>
+      <path class="edge dash" d="M416,64 V120 H480 V160" marker-end="url(#arr4)"/>
+      <path class="edge dash" d="M536,64 V120 H512 V160" marker-end="url(#arr4)"/>
+      <text class="a" x="560" y="140">SLA breach, scheduled message</text>
+      <rect class="box sha" x="724" y="160" width="104" height="44" rx="4"/><text class="st" x="742" y="187">Reopened</text>
+      <path class="edge dash" d="M656,64 V120 H760 V160" marker-end="url(#arr4)"/>
+      <text class="a" x="780" y="140">verification fails</text>
+    </svg>
+    <div class="cols" style="flex:0 0 auto">
+      <ul>
+        <li>Critical alarms open a work order automatically; Warning alarms go to triage.</li>
+        <li>States and moves live in a Domain state machine. An illegal move raises <code>InvalidWorkOrderTransitionException</code> (409).</li>
+        <li>SLA durations come from configuration.</li>
+      </ul>
+      <ul>
+        <li><strong>Example, seeded site IN-DEL-0002 Dwarka Sector 12</strong> (Monopole 30 m, tenants Aurora Mobile and Bluewave Telecom, shared Diesel Generator and Battery Bank).</li>
+        <li>The shelter door contact opens. If a technician has checked in on an open work order for this tower, it is expected. If not, it raises an intrusion alarm.</li>
+      </ul>
+    </div>
+  </div>
+  <aside class="notes">Escalation is shown from Assigned and In progress for readability; the rule is an SLA breach detected by a scheduled message. Cancelled needs a reason and is only allowed from Open or Triaged. Reopened happens when verification after completion fails. The door example shows why work orders and sensors belong in one model: the same event means different things depending on whether a job is open.</aside>
+</section>
+
+<!-- 6d -->
+<section class="slide">
+  <div class="inner">
+    <div class="headrow"><div class="eyebrow">Domain additions</div><span class="pill prop">Proposed, not approved</span></div>
+    <h2>Seven new entities, same layers</h2>
+    <div class="cols">
+      <div class="table-wrap"><table>
+        <tr><th>Entity</th><th>Purpose</th></tr>
+        <tr><td class="mono">Sensor</td><td>A device on a tower, by type</td></tr>
+        <tr><td class="mono">TelemetryReading</td><td>Raw reading and per-minute roll-up; stored in Cosmos DB, not the business database</td></tr>
+        <tr><td class="mono">AlarmRule</td><td>Threshold held as configuration</td></tr>
+        <tr><td class="mono">Alarm</td><td>Raised when a rule fires; one active per tower and sensor</td></tr>
+        <tr><td class="mono">WorkOrder</td><td>Job to fix it; replaces the earlier MaintenanceTicket idea</td></tr>
+        <tr><td class="mono">WorkOrderEvent</td><td>Audit trail of every state change</td></tr>
+        <tr><td class="mono">Technician</td><td>Person assigned and checking in on site</td></tr>
+      </table></div>
+      <div style="display:grid;gap:1.2cqw;align-content:start">
+        <span class="label">Code placement</span>
+        <ul>
+          <li>Modular monolith: new <code>Monitoring/</code> and <code>WorkOrders/</code> folders in the existing projects.</li>
+          <li>New <code>TowerCo.Ingestion</code> Functions project that reuses the Domain alarm rules.</li>
+          <li>Telemetry repository interface in Application; Cosmos DB implementation in Infrastructure, so the health page does not know where readings live.</li>
+          <li>No new service boundaries until load or team size needs them.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">This builds on the Phase 1 structure rather than replacing it. Each module follows the same Domain, Application, Infrastructure split, so the live-change habits from Phase 1 still apply.</aside>
+</section>
+
+<!-- 6-nfr -->
+<section class="slide">
+  <div class="inner">
+    <div class="headrow"><div class="eyebrow">Cross-cutting qualities</div><span class="pill prop">Proposed, not approved</span></div>
+    <h2>What the platform must be, not just do</h2>
+    <div class="table-wrap"><table>
+      <tr><th>Quality</th><th>Approach</th></tr>
+      <tr><td><strong>Scale</strong></td><td>Sensor path scales on its own: IoT Hub partitions, Functions per partition, Cosmos DB autoscale. Web and API scale separately.</td></tr>
+      <tr><td><strong>Security</strong></td><td>Entra ID roles per persona; Entra External ID for operator users; managed identities, Key Vault, private endpoints; Front Door with WAF at the edge.</td></tr>
+      <tr><td><strong>Resilience</strong></td><td>Queue between alarm and work order, so a slow worker never drops an alarm; idempotent handlers; Cosmos DB and Azure SQL geo-replication to a second region.</td></tr>
+      <tr><td><strong>Data residency</strong></td><td>Four countries; per-country rules to be confirmed before choosing regions. Partition by country is possible if needed.</td></tr>
+      <tr><td><strong>Observability</strong></td><td>Application Insights with one correlation ID from sensor message to work order; alert on ingestion lag and dead-letter growth.</td></tr>
+      <tr><td><strong>Cost</strong></td><td>Raw data expires from Cosmos DB by time to live; long-term history in cheap lake storage; autoscale down at night.</td></tr>
+      <tr><td><strong>Delivery</strong></td><td>Bicep for every resource, GitHub Actions per deployable, same pipeline for each environment.</td></tr>
+    </table></div>
+  </div>
+  <aside class="notes">These are the questions an architect reviewer will ask. Data residency is the one I would raise first with the business, because it decides regions and may force per-country data stores. No targets (uptime, latency, retention) are set yet; they should come from the business, not from me.</aside>
+</section>
+
+<!-- 7 -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">Design decisions</div>
+    <h2>Choices and the reason for each</h2>
+    <div class="cols">
+      <ul>
+        <li><strong>SQLite file database.</strong> Zero setup, created and seeded on first run, portable for a demo.</li>
+        <li><strong>Derived capacity.</strong> Calculated from tenancies, never stored, so it cannot go stale.</li>
+        <li><strong>Seed through domain methods.</strong> Demo data obeys the same invariants as live data.</li>
+        <li><strong>Enums stored as text.</strong> The database reads clearly when inspected.</li>
+      </ul>
+      <ul>
+        <li><strong>One Equipment entity.</strong> Owner comes from TenancyId, so tenant and shared kit share one table.</li>
+        <li><strong>Custom exceptions to ProblemDetails.</strong> 404, 409 and 400 mapped in one place.</li>
+        <li><strong>Typed mock API in the client.</strong> UI work ran in parallel with the backend; one env flag switches to the real API.</li>
+        <li><strong>Pinned packages.</strong> Upgrading to 10.0.14 cleared a high-severity Microsoft.OpenApi advisory.</li>
+      </ul>
+    </div>
+  </div>
+  <aside class="notes">Pick two or three of these depending on time. The mock API point explains how frontend and backend were built at the same time by separate streams.</aside>
+</section>
+
+<!-- 8 -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">Seeded portfolio</div>
+    <h2>12 sites, 4 countries, 9 operators</h2>
+    <div class="cols">
+      <div style="display:grid;gap:1.4cqw;align-content:start">
+        <span class="label">Utilisation by country (active tenancies ÷ slots)</span>
+        <div class="hbars">
+          <div class="hrow"><span>India</span><div class="bar"><span style="width:42.9%"></span></div><span>6 / 14 · 42.9%</span></div>
+          <div class="hrow"><span>South Africa</span><div class="bar"><span style="width:57.1%"></span></div><span>4 / 7 · 57.1%</span></div>
+          <div class="hrow"><span>Kenya</span><div class="bar"><span style="width:60%"></span></div><span>3 / 5 · 60.0%</span></div>
+          <div class="hrow"><span>Nigeria</span><div class="bar"><span style="width:50%"></span></div><span>3 / 6 · 50.0%</span></div>
+          <div class="hrow" style="font-weight:600"><span>Portfolio</span><div class="bar"><span style="width:50%"></span></div><span>16 / 32 · 50.0%</span></div>
+        </div>
+        <p class="muted" style="font-size:1.25cqw">Worked by hand from the seed, as of 2 Nov 2026, excluding decommissioned KE-KSM-0003 (rule 8). This is the expected output of the portfolio summary endpoint.</p>
+      </div>
+      <div class="table-wrap" style="align-self:start"><table>
+        <tr><th>Fact</th><th>Count</th></tr>
+        <tr><td>Sites Active / Under construction / Planned / Decommissioned</td><td class="mono">9 / 1 / 1 / 1</td></tr>
+        <tr><td>Tenancies on record (active)</td><td class="mono">17 (16)</td></tr>
+        <tr><td>Full towers</td><td class="mono">3</td></tr>
+        <tr><td>Active towers with free slots</td><td class="mono">6</td></tr>
+        <tr><td>Equipment types in catalogue</td><td class="mono">8</td></tr>
+      </table></div>
+    </div>
+  </div>
+  <aside class="notes">Kenya and India look different because of mix: India has the under-construction Hyderabad tower with 4 empty slots pulling the average down. Rooftop sites run on solar, other towers on diesel, and every active tower has a battery bank.</aside>
+</section>
+
+<!-- 9 -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">Status at a glance</div>
+    <h2>What is built today and what comes next</h2>
+    <div class="cols3">
+      <div style="display:grid;gap:1cqw;align-content:start">
+        <span class="pill built" style="justify-self:start">Built · backend</span>
+        <ul>
+          <li>Five-project solution, Clean Architecture</li>
+          <li>6 entities, 2 value objects, guards</li>
+          <li>Tenancy rules 1 to 3 in <code>Tower.AddTenancy</code></li>
+          <li>EF Core mapping, SQLite file, seed on first run</li>
+          <li>Exception handler to ProblemDetails</li>
+          <li>36 tests passing</li>
+          <li>Scalar API reference in Development</li>
+        </ul>
+      </div>
+      <div style="display:grid;gap:1cqw;align-content:start">
+        <span class="pill mock" style="justify-self:start">Built · UI on mock API</span>
+        <ul>
+          <li>Portfolio dashboard</li>
+          <li>Sites list with filters</li>
+          <li>Site detail: tower, capacity, tenancies</li>
+          <li>Operators list</li>
+          <li>Tower configuration page</li>
+        </ul>
+      </div>
+      <div style="display:grid;gap:1cqw;align-content:start">
+        <span class="pill next" style="justify-self:start">Next</span>
+        <ul>
+          <li>Application services and controllers for the six endpoints</li>
+          <li>Rules 7 and 8</li>
+          <li>Switch the UI from mock to real API</li>
+          <li>Add-tenant and register-site forms</li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot"><span>Tests counted on 2 Nov 2026</span><span>Source: CLAUDE.md progress log</span></div>
+  </div>
+  <aside class="notes">Say this plainly before the live demo so nobody expects the forms to save to the database yet. The UI runs on a typed mock that matches the API contracts the backend will implement.</aside>
+</section>
+
+<!-- 10 -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">Live demo · today</div>
+    <h2>Run order, about 8 minutes</h2>
+    <div class="cols">
+      <ol class="steps">
+        <li><span>Run the tests and show them pass.</span></li>
+        <li><span>Start the app. The SPA proxy launches Vite with the API.</span></li>
+        <li><span>Dashboard: KPI tiles, utilisation by country, renewals due.</span></li>
+        <li><span>Sites: filter by country, then status, then free text.</span></li>
+        <li><span>Open a full tower and a tower with free slots; compare capacity bars.</span></li>
+        <li><span>Code: <code>Tower.cs</code> capacity, <code>SeedData.cs</code>, <code>DomainExceptionHandler.cs</code>.</span></li>
+        <li><span>Open <code>towerco.db</code> to show seeded rows and text enums.</span></li>
+      </ol>
+      <div style="display:grid;gap:1.2cqw;align-content:start">
+        <span class="label">Commands, from the repository root</span>
+        <div class="cmd">dotnet test TowerCo.Tests</div>
+        <div class="cmd">dotnet run --project TowerCo_Mgmt.Server --launch-profile https</div>
+        <p class="muted" style="font-size:1.3cqw">UI pages run on mock data in this build. Database steps use the seeded SQLite file created on first start.</p>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">If the SPA proxy is slow, run npm run dev inside towerco_mgmt.client in a second terminal. Keep the code walk short: capacity first, because it is the heart of UC2.</aside>
+</section>
+
+<!-- 11 -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">Target demo · end of Phase 1</div>
+    <h2>The script that defines success</h2>
+    <ol class="steps">
+      <li><span>Sites list loads from the API with seeded data.</span></li>
+      <li><span>Filter by country, status and free text.</span></li>
+      <li><span>Site detail shows tower, tenancies, capacity bar and equipment split by owner.</span></li>
+      <li><span>Add an operator to a tower with free slots; the capacity bar updates.</span></li>
+      <li><span>A full tower shows the add-tenant form disabled with a "no capacity" message.</span></li>
+      <li><span>Adding the same operator twice shows a clear 409 message.</span></li>
+      <li><span>Register a new site; a duplicate site code shows 409.</span></li>
+      <li><span>Portfolio overview matches the seed and reflects the tenant added in step 4.</span></li>
+    </ol>
+  </div>
+  <aside class="notes">This is the "Definition of success" from CLAUDE.md section 5. Use it to show the plan is concrete and testable, and that today's build is the foundation for it.</aside>
+</section>
+
+<!-- 12 -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">Live change</div>
+    <h2>Small changes, each under five minutes</h2>
+    <div class="table-wrap"><table>
+      <tr><th>Change</th><th>Where</th><th>Proof</th></tr>
+      <tr><td>Add a new equipment type</td><td class="mono">SeedCatalogue.cs only</td><td>Catalogue count test</td></tr>
+      <tr><td>Reserve one slot on every tower for TowerCo</td><td class="mono">Tower.AvailableSlots</td><td><code>TowerTests</code></td></tr>
+      <tr><td>Add a Region field to Site</td><td class="mono">Site.cs, SiteConfiguration.cs, seed</td><td><code>PersistenceTests</code> round trip</td></tr>
+      <tr><td>Count future-dated leases as not yet active</td><td class="mono">Tenancy.IsActiveOn</td><td><code>TenancyAndEquipmentTests</code></td></tr>
+    </table></div>
+    <p class="muted">Each change lives in one layer and has a test next to it, which is the point of the structure.</p>
+  </div>
+  <aside class="notes">Offer the audience a choice. The equipment type change shows "data not code". The capacity change shows rules are isolated in the domain. Delete towerco.db before restarting if the schema changes, because the demo uses EnsureCreated, not migrations.</aside>
+</section>
+
+<!-- 13 -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">Quality</div>
+    <h2>How the code is kept honest</h2>
+    <div class="cols">
+      <ul>
+        <li>36 xUnit tests: domain rules, guards, persistence round trip, seed, exception mapping.</li>
+        <li>Line and branch coverage was 100% on Domain and Infrastructure at the last coverage run; startup code and generated files excluded.</li>
+        <li>Persistence tests use SQLite in memory, so they exercise real SQL.</li>
+      </ul>
+      <ul>
+        <li>Methods under 15 lines; constants in named classes, connection string in config.</li>
+        <li>Custom exceptions only; a missing connection string fails fast at startup.</li>
+        <li>No secrets in code or config.</li>
+      </ul>
+    </div>
+  </div>
+  <aside class="notes">Coverage figure comes from the last coverage run in this build; re-run with --collect "XPlat Code Coverage" before quoting it live if more code has landed since.</aside>
+</section>
+
+<!-- 14 -->
+<section class="slide">
+  <div class="inner">
+    <div class="eyebrow">Roadmap</div>
+    <h2>Phases after this session</h2>
+    <div class="table-wrap"><table>
+      <tr><th>Phase</th><th>Adds</th></tr>
+      <tr><td class="mono">2</td><td>Edit site and tower, status transitions, equipment management</td></tr>
+      <tr><td class="mono">3</td><td>Leaflet map coloured by utilisation, country to site drill-down, trends</td></tr>
+      <tr><td class="mono">4</td><td>Role-based views, end tenancy, audit history, Azure App Service and Azure SQL</td></tr>
+      <tr><td class="mono">5</td><td>Monitoring and tower health: simulator posts readings to the API, no Azure needed <span class="pill prop">Proposed</span></td></tr>
+      <tr><td class="mono">6</td><td>Work orders: lifecycle, auto-open on Critical, SLA escalation; in-process queue behind the Service Bus interface <span class="pill prop">Proposed</span></td></tr>
+      <tr><td class="mono">7</td><td>Azure and field: IoT Hub, ingestion Functions, Cosmos DB, Service Bus, Azure SQL, Data Lake, Entra ID, technician PWA <span class="pill prop">Proposed</span></td></tr>
+      <tr><td class="mono">8</td><td>Enterprise integration: operator partner API, finance ERP invoicing, analytics on the lake <span class="pill prop">Proposed</span></td></tr>
+    </table></div>
+    <p class="muted"><strong>Decided:</strong> sensor data in Azure Cosmos DB. <strong>Open questions:</strong> per-country data residency; build work orders in-house or integrate an existing maintenance system; auto-open on Critical only, or also on repeated Warnings.</p>
+  </div>
+  <aside class="notes">Phases 5 to 7 are drafts and not approved. Phases 5 and 6 deliberately avoid Azure so they can be built and demoed locally; Phase 7 swaps in the cloud services behind interfaces that already exist.</aside>
+</section>
+
+<!-- 15 -->
+<section class="slide title-slide">
+  <div class="inner">
+    <div class="eyebrow">Questions</div>
+    <h1>Thank you</h1>
+    <p class="muted">Happy to go deeper on the domain model, the capacity rule, or make a live change.</p>
+  </div>
+  <aside class="notes">Good prompts if the room is quiet: why slots over structural load, how you would add authentication per persona, how the mock API keeps the UI contract honest.</aside>
+</section>
+
+</div>
+
+<div class="controls">
+  <button id="prev" type="button" aria-label="Previous slide">← Prev</button>
+  <button id="next" type="button" aria-label="Next slide">Next →</button>
+  <button id="toggleNotes" type="button" aria-pressed="false">Notes (N)</button>
+  <span class="count" id="count"></span>
+</div>
+<div class="notes-panel" id="notesPanel" hidden><strong>Speaker notes</strong><div id="notesText"></div></div>
+
+<script>
+(function () {
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const count = document.getElementById('count');
+  const panel = document.getElementById('notesPanel');
+  const notesText = document.getElementById('notesText');
+  const notesBtn = document.getElementById('toggleNotes');
+  let index = 0;
+
+  function initialIndex() {
+    const match = /^#s(\d+)$/.exec(location.hash);
+    const n = match ? Number(match[1]) - 1 : 0;
+    return n >= 0 && n < slides.length ? n : 0;
+  }
+
+  function show(i) {
+    index = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s, n) => s.classList.toggle('active', n === index));
+    count.textContent = (index + 1) + ' / ' + slides.length;
+    const note = slides[index].querySelector('.notes');
+    notesText.textContent = note ? note.textContent : '';
+  }
+
+  function toggleNotes() {
+    panel.hidden = !panel.hidden;
+    notesBtn.setAttribute('aria-pressed', String(!panel.hidden));
+  }
+
+  document.getElementById('prev').addEventListener('click', () => show(index - 1));
+  document.getElementById('next').addEventListener('click', () => show(index + 1));
+  notesBtn.addEventListener('click', toggleNotes);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); show(index + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); show(index - 1); }
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(slides.length - 1);
+    else if (e.key === 'n' || e.key === 'N') toggleNotes();
+  });
+  show(initialIndex());
+})();
+</script>

@@ -1,0 +1,648 @@
+<title>TowerCo Phase 1 Brief</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: single reading column, wide diagram bands; aviation-orange marks what is in Phase 1 scope */
+:root {
+  --bg: #f4f6f7;
+  --surface: #ffffff;
+  --fg: #16212a;
+  --muted: #5a6872;
+  --line: #d5dde2;
+  --accent: #d9501a;        /* aviation obstruction orange */
+  --accent-soft: #fbe6dc;
+  --steel: #2f5d7c;
+  --steel-soft: #e1ebf2;
+  --ok: #1f7a4d;
+  --ok-soft: #dcf1e5;
+  --warn: #a86a00;
+  --warn-soft: #fbefd6;
+  --bad: #b3261e;
+  --bad-soft: #f9e0de;
+  --display: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+  --body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1519; --surface: #172028; --fg: #e4eaee; --muted: #93a2ad; --line: #2b3842;
+    --accent: #ff7a3d; --accent-soft: #3a2116; --steel: #7fb2d6; --steel-soft: #1b2d3a;
+    --ok: #5cc98f; --ok-soft: #15301f; --warn: #e6b04a; --warn-soft: #33280f; --bad: #f08a80; --bad-soft: #3a1c1a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1519; --surface: #172028; --fg: #e4eaee; --muted: #93a2ad; --line: #2b3842;
+  --accent: #ff7a3d; --accent-soft: #3a2116; --steel: #7fb2d6; --steel-soft: #1b2d3a;
+  --ok: #5cc98f; --ok-soft: #15301f; --warn: #e6b04a; --warn-soft: #33280f; --bad: #f08a80; --bad-soft: #3a1c1a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1040px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px 64px; display: grid; gap: 48px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; line-height: 1.1; }
+h1 { font-size: clamp(2.2rem, 6vw, 3.4rem); font-weight: 700; letter-spacing: 0.01em; }
+h2 { font-size: 1.75rem; font-weight: 600; }
+h3 { font-size: 1.2rem; font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+code, .mono { font-family: var(--mono); font-size: 0.85em; }
+.eyebrow { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+.muted { color: var(--muted); }
+section { display: grid; gap: 18px; min-width: 0; }
+.sec-head { display: grid; gap: 6px; }
+
+/* header */
+header { display: grid; gap: 14px; border-bottom: 2px solid var(--fg); padding-bottom: 24px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 20px; font-family: var(--mono); font-size: 0.8rem; color: var(--muted); }
+.meta b { color: var(--fg); font-weight: 500; }
+
+/* chips */
+.chip { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 0.72rem; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.04em; white-space: nowrap; }
+.chip.p1 { background: var(--accent); color: var(--surface); }
+.chip.later { background: var(--steel-soft); color: var(--steel); }
+.chip.ok { background: var(--ok-soft); color: var(--ok); }
+.chip.warn { background: var(--warn-soft); color: var(--warn); }
+.chip.bad { background: var(--bad-soft); color: var(--bad); }
+
+/* use cases */
+.uc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.uc { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; display: grid; gap: 10px; align-content: start; }
+.uc.in { border-color: var(--accent); box-shadow: inset 0 3px 0 var(--accent); }
+.uc-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.uc-id { font-family: var(--display); font-size: 1.6rem; font-weight: 700; }
+.uc .persona { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+
+/* diagrams */
+.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; overflow-x: auto; }
+.diagram svg { display: block; width: 100%; min-width: 640px; height: auto; }
+svg text { font-family: var(--body); fill: var(--fg); }
+svg .t-title { font-family: var(--display); font-weight: 600; font-size: 19px; }
+svg .t-attr { font-family: var(--mono); font-size: 11.5px; fill: var(--muted); }
+svg .t-card { font-family: var(--mono); font-size: 13px; fill: var(--accent); font-weight: 500; }
+svg .t-small { font-size: 12px; fill: var(--muted); }
+svg .box { fill: var(--surface); stroke: var(--fg); stroke-width: 1.5; }
+svg .box-head { fill: var(--steel-soft); }
+svg .box-acc { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; }
+svg .edge { stroke: var(--fg); stroke-width: 1.5; fill: none; }
+svg .edge-dash { stroke: var(--muted); stroke-width: 1.3; fill: none; stroke-dasharray: 5 4; }
+svg .arrowhead { fill: var(--fg); }
+
+.two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.formula { display: grid; gap: 6px; font-family: var(--mono); font-size: 0.82rem; }
+.formula div { display: flex; flex-wrap: wrap; gap: 6px; }
+.formula b { color: var(--accent); font-weight: 500; }
+ol.rules { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
+ol.rules li { padding-left: 4px; }
+
+/* simulator */
+.sim { display: grid; grid-template-columns: minmax(160px, 220px) 1fr; gap: 20px; align-items: start; }
+@media (max-width: 640px) { .sim { grid-template-columns: 1fr; } }
+.tower { display: grid; gap: 6px; justify-items: center; }
+.mast { width: 100%; max-width: 200px; display: grid; gap: 6px; padding: 10px; border: 2px solid var(--fg); border-radius: 4px; position: relative; }
+.mast::before { content: ""; position: absolute; top: -14px; left: 50%; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+.slot { height: 38px; border-radius: 3px; border: 1.5px dashed var(--line); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: var(--muted); }
+.slot.taken { border-style: solid; border-color: var(--steel); background: var(--steel-soft); color: var(--steel); font-weight: 600; }
+.base { width: 70%; height: 6px; background: var(--fg); border-radius: 2px; }
+.cap-bar { height: 10px; background: var(--line); border-radius: 5px; overflow: hidden; width: 100%; }
+.cap-fill { height: 100%; background: var(--ok); transition: width 0.3s; }
+.controls { display: grid; gap: 12px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+label { display: grid; gap: 4px; font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+select, button { font: inherit; font-size: 0.9rem; padding: 7px 10px; border-radius: 4px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); }
+button { cursor: pointer; }
+button.primary { background: var(--accent); color: var(--surface); border-color: var(--accent); font-weight: 600; }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--steel); outline-offset: 2px; }
+.response { font-family: var(--mono); font-size: 0.82rem; padding: 12px; border-radius: 4px; border: 1px solid var(--line); background: var(--bg); min-height: 64px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.response.ok { border-color: var(--ok); }
+.response.bad { border-color: var(--bad); }
+
+/* tables */
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 500; }
+tr:last-child td { border-bottom: 0; }
+.verb { font-family: var(--mono); font-size: 0.75rem; font-weight: 600; }
+.verb.get { color: var(--steel); }
+.verb.post { color: var(--accent); }
+
+/* timebox */
+.timebox { display: flex; width: 100%; border-radius: 4px; overflow: hidden; border: 1px solid var(--fg); }
+.tb { padding: 10px 8px; font-size: 0.78rem; border-right: 1px solid var(--fg); display: grid; gap: 2px; min-width: 0; background: var(--surface); }
+.tb:last-child { border-right: 0; }
+.tb .mins { font-family: var(--mono); font-size: 0.72rem; color: var(--accent); }
+.tb .what { overflow-wrap: anywhere; }
+.tb.ui { background: var(--steel-soft); }
+.ticks { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) { .timebox { flex-direction: column; } .tb { flex: none !important; border-right: 0; border-bottom: 1px solid var(--fg); } .tb:last-child { border-bottom: 0; } .ticks { display: none; } }
+
+/* checklist */
+.check-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.check-group { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; display: grid; gap: 10px; align-content: start; }
+.check-group header { border: 0; padding: 0; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.check-item { display: grid; grid-template-columns: 20px 1fr; gap: 10px; align-items: start; font-size: 0.9rem; text-transform: none; letter-spacing: 0; color: var(--fg); cursor: pointer; }
+.check-item input { margin-top: 3px; accent-color: var(--ok); width: 16px; height: 16px; }
+.progress { display: grid; gap: 6px; }
+.progress-line { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+
+/* roadmap */
+.roadmap { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--surface); }
+.phase { padding: 16px; display: grid; gap: 8px; align-content: start; border-right: 1px solid var(--line); }
+.phase:last-child { border-right: 0; }
+.phase.now { background: var(--accent-soft); }
+.phase ul { margin: 0; padding-left: 18px; font-size: 0.88rem; display: grid; gap: 4px; }
+.phase-num { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); letter-spacing: 0.08em; }
+.phase.now .phase-num { color: var(--accent); }
+
+.decisions { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.decision { border-left: 3px solid var(--ok); padding: 4px 0 4px 12px; display: grid; gap: 4px; }
+.decision.assume { border-left-color: var(--warn); }
+.decision b { font-family: var(--display); font-size: 1.1rem; font-weight: 600; }
+footer { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; }
+@media (prefers-reduced-motion: reduce) { .cap-fill { transition: none; } }
+</style>
+
+<div class="wrap">
+
+<header>
+  <span class="eyebrow">Full stack practical exercise &middot; requirements</span>
+  <h1>TowerCo Tower Management System</h1>
+  <p>TowerCo builds and operates telecom tower sites across several countries and leases space on those towers to mobile network operators. This page sets out what we understand, what Phase 1 delivers in 40 minutes, and how we will know it worked.</p>
+  <div class="meta">
+    <span>Stack <b>React + .NET 10 + SQLite</b></span>
+    <span>Phase 1 timebox <b>40 min</b></span>
+    <span>Focus <b>commercial user, any user browsing</b></span>
+    <span>Data <b>fictional</b></span>
+  </div>
+</header>
+
+<section id="usecases">
+  <div class="sec-head">
+    <span class="eyebrow">Use cases</span>
+    <h2>Who needs what, and when we build it</h2>
+  </div>
+  <div class="uc-grid">
+    <article class="uc in">
+      <div class="uc-top"><span class="uc-id">UC3</span><span class="chip p1">PHASE 1</span></div>
+      <span class="persona">Any user</span>
+      <h3>Find sites</h3>
+      <p class="muted">Search and filter by country, status or text. Open one view with everything about a site.</p>
+    </article>
+    <article class="uc in">
+      <div class="uc-top"><span class="uc-id">UC2</span><span class="chip p1">PHASE 1</span></div>
+      <span class="persona">Commercial user</span>
+      <h3>Assign tenants</h3>
+      <p class="muted">Add an operator as tenant on a tower and see whether the tower has room for more.</p>
+    </article>
+    <article class="uc">
+      <div class="uc-top"><span class="uc-id">UC1</span><span class="chip later">PHASE 2</span></div>
+      <span class="persona">Operations user</span>
+      <h3>Manage tower sites</h3>
+      <p class="muted">Register a new site and its tower, update details over time.</p>
+    </article>
+    <article class="uc">
+      <div class="uc-top"><span class="uc-id">UC4</span><span class="chip later">PHASE 3</span></div>
+      <span class="persona">Manager</span>
+      <h3>Visualise the portfolio</h3>
+      <p class="muted">Map of sites and utilisation at a glance.</p>
+    </article>
+  </div>
+</section>
+
+<section id="domain">
+  <div class="sec-head">
+    <span class="eyebrow">Domain model</span>
+    <h2>Six entities, capacity derived on read</h2>
+    <p class="muted">One tower per site keeps Phase 1 simple. A tenancy is one operator holding one slot on one tower. Equipment sits on the tower and is either owned by a tenant or shared TowerCo infrastructure.</p>
+  </div>
+  <div class="diagram">
+    <svg viewBox="0 0 800 420" role="img" aria-label="Entity diagram: Operator one-to-many Tenancy, Tenancy many-to-one Tower, Tower one-to-one Site, Tower one-to-many Equipment, Tenancy zero-or-one to many Equipment, Equipment many-to-one EquipmentType">
+      <!-- Operator -->
+      <rect class="box" x="10" y="20" width="170" height="130" rx="4"/>
+      <rect class="box-head" x="11" y="21" width="168" height="34" rx="3"/>
+      <text class="t-title" x="24" y="45">Operator</text>
+      <text class="t-attr" x="24" y="76">Id</text>
+      <text class="t-attr" x="24" y="94">Name</text>
+      <text class="t-attr" x="24" y="112">CountryCode</text>
+      <!-- Tenancy -->
+      <rect class="box-acc" x="215" y="20" width="180" height="170" rx="4"/>
+      <text class="t-title" x="229" y="45">Tenancy</text>
+      <line x1="216" y1="56" x2="394" y2="56" stroke="var(--accent)" stroke-width="1"/>
+      <text class="t-attr" x="229" y="76">Id, TowerId, OperatorId</text>
+      <text class="t-attr" x="229" y="94">StartDate</text>
+      <text class="t-attr" x="229" y="112">EndDate (nullable)</text>
+      <text class="t-attr" x="229" y="130">MonthlyRent</text>
+      <text class="t-attr" x="229" y="148">Currency</text>
+      <text class="t-small" x="229" y="176">active when EndDate empty or future</text>
+      <!-- Tower -->
+      <rect class="box" x="430" y="20" width="170" height="150" rx="4"/>
+      <rect class="box-head" x="431" y="21" width="168" height="34" rx="3"/>
+      <text class="t-title" x="444" y="45">Tower</text>
+      <text class="t-attr" x="444" y="76">Id, SiteId</text>
+      <text class="t-attr" x="444" y="94">TowerType</text>
+      <text class="t-attr" x="444" y="112">HeightMetres</text>
+      <text class="t-attr" x="444" y="130" style="fill: var(--accent)">MaxTenants</text>
+      <text class="t-small" x="444" y="156">Monopole, Lattice, Guyed, Rooftop</text>
+      <!-- Site -->
+      <rect class="box" x="635" y="20" width="155" height="186" rx="4"/>
+      <rect class="box-head" x="636" y="21" width="153" height="34" rx="3"/>
+      <text class="t-title" x="649" y="45">Site</text>
+      <text class="t-attr" x="649" y="76">Id</text>
+      <text class="t-attr" x="649" y="94">SiteCode</text>
+      <text class="t-attr" x="649" y="112">Name, City</text>
+      <text class="t-attr" x="649" y="130">CountryCode</text>
+      <text class="t-attr" x="649" y="148">Latitude, Longitude</text>
+      <text class="t-attr" x="649" y="166">Status</text>
+      <text class="t-attr" x="649" y="184">CreatedAtUtc</text>
+      <!-- edges -->
+      <line class="edge" x1="180" y1="85" x2="215" y2="85"/>
+      <text class="t-card" x="184" y="78">1</text>
+      <text class="t-card" x="204" y="78">*</text>
+      <line class="edge" x1="395" y1="85" x2="430" y2="85"/>
+      <text class="t-card" x="399" y="78">*</text>
+      <text class="t-card" x="419" y="78">1</text>
+      <line class="edge" x1="600" y1="85" x2="635" y2="85"/>
+      <text class="t-card" x="604" y="78">1</text>
+      <text class="t-card" x="624" y="78">1</text>
+      <!-- Equipment -->
+      <rect class="box-acc" x="300" y="240" width="230" height="150" rx="4"/>
+      <text class="t-title" x="314" y="265">Equipment</text>
+      <line x1="301" y1="276" x2="529" y2="276" stroke="var(--accent)" stroke-width="1"/>
+      <text class="t-attr" x="314" y="296">Id, TowerId, EquipmentTypeId</text>
+      <text class="t-attr" x="314" y="314" style="fill: var(--accent)">TenancyId (nullable)</text>
+      <text class="t-attr" x="314" y="332">SerialNumber, InstalledOn</text>
+      <text class="t-attr" x="314" y="350">MountHeightMetres, Status</text>
+      <text class="t-small" x="314" y="376">TenancyId empty = TowerCo shared</text>
+      <!-- EquipmentType -->
+      <rect class="box" x="600" y="240" width="190" height="130" rx="4"/>
+      <rect class="box-head" x="601" y="241" width="188" height="34" rx="3"/>
+      <text class="t-title" x="614" y="265">EquipmentType</text>
+      <text class="t-attr" x="614" y="296">Id, Name, Category</text>
+      <text class="t-small" x="614" y="322">Configurable catalogue</text>
+      <text class="t-small" x="614" y="340">Radio, Transmission, Power,</text>
+      <text class="t-small" x="614" y="356">Cooling, Security</text>
+      <!-- equipment edges -->
+      <line class="edge-dash" x1="340" y1="190" x2="340" y2="240"/>
+      <text class="t-card" x="346" y="206">0..1</text>
+      <text class="t-card" x="346" y="234">*</text>
+      <line class="edge" x1="500" y1="170" x2="500" y2="240"/>
+      <text class="t-card" x="506" y="186">1</text>
+      <text class="t-card" x="506" y="234">*</text>
+      <line class="edge" x1="530" y1="300" x2="600" y2="300"/>
+      <text class="t-card" x="536" y="293">*</text>
+      <text class="t-card" x="588" y="293">1</text>
+      <text class="t-small" x="10" y="412">Site code example: IN-MUM-0001. Site status: Planned, UnderConstruction, Active, Decommissioned.</text>
+    </svg>
+  </div>
+  <div class="two-col">
+    <div class="panel">
+      <h3>Derived capacity (never stored)</h3>
+      <div class="formula">
+        <div><b>ActiveTenantCount</b> = active tenancies on tower</div>
+        <div><b>AvailableSlots</b> = MaxTenants &minus; ActiveTenantCount</div>
+        <div><b>UtilisationPercent</b> = ActiveTenantCount &divide; MaxTenants &times; 100</div>
+        <div><b>HasCapacity</b> = AvailableSlots &gt; 0</div>
+      </div>
+      <p class="muted">Calculated from tenancies each time, so it cannot drift out of sync. Structural load (wind, antenna weight) is a later extension.</p>
+    </div>
+    <div class="panel">
+      <h3>Business rules when adding a tenant</h3>
+      <ol class="rules">
+        <li>Site must be <code>Active</code>, else <span class="chip bad">409 SiteNotActive</span></li>
+        <li>Operator not already active on this tower, else <span class="chip bad">409 DuplicateTenancy</span></li>
+        <li>Tower has a free slot, else <span class="chip bad">409 TowerCapacityExceeded</span></li>
+        <li>Unknown site, tower or operator: <span class="chip warn">404 NotFound</span></li>
+      </ol>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Equipment on IN-DEL-0002 <span class="chip p1">PHASE 1 READ ONLY</span></h3>
+    <p class="muted">Display only: equipment does not change slot capacity. Adding and editing equipment arrives in Phase 2.</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Type</th><th>Category</th><th>Owner</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>5G Active Antenna (AAU)</td><td>Radio</td><td>Aurora Mobile</td><td><span class="chip ok">Installed</span></td></tr>
+          <tr><td>Microwave Dish</td><td>Transmission</td><td>Aurora Mobile</td><td><span class="chip ok">Installed</span></td></tr>
+          <tr><td>4G Remote Radio Unit</td><td>Radio</td><td>Bluewave Telecom</td><td><span class="chip ok">Installed</span></td></tr>
+          <tr><td>Microwave Dish</td><td>Transmission</td><td>Bluewave Telecom</td><td><span class="chip ok">Installed</span></td></tr>
+          <tr><td>Diesel Generator</td><td>Power</td><td><b>TowerCo shared</b></td><td><span class="chip ok">Installed</span></td></tr>
+          <tr><td>Battery Bank</td><td>Power</td><td><b>TowerCo shared</b></td><td><span class="chip ok">Installed</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">Rows match the seed data (fictional operators and sites).</p>
+  </div>
+</section>
+
+<section id="simulator">
+  <div class="sec-head">
+    <span class="eyebrow">Try the rules</span>
+    <h2>Add a tenant to a sample tower</h2>
+    <p class="muted">Seeded tower: <span class="mono">IN-DEL-0002</span> Dwarka Sector 12, Monopole, 30 m, 3 slots. Pick an operator and press Add to see what the API would return.</p>
+  </div>
+  <div class="panel sim">
+    <div class="tower">
+      <div class="mast" id="mast" aria-live="polite"></div>
+      <div class="base"></div>
+      <div class="cap-bar" aria-hidden="true"><div class="cap-fill" id="capFill"></div></div>
+      <span class="mono" id="capText"></span>
+    </div>
+    <div class="controls">
+      <div class="row">
+        <label for="siteStatus">Site status
+          <select id="siteStatus">
+            <option>Active</option>
+            <option>Planned</option>
+            <option>UnderConstruction</option>
+            <option>Decommissioned</option>
+          </select>
+        </label>
+        <label for="maxTenants">Max tenants
+          <select id="maxTenants"><option>2</option><option selected>3</option><option>4</option><option>5</option></select>
+        </label>
+      </div>
+      <div class="row">
+        <label for="operator">Operator
+          <select id="operator"></select>
+        </label>
+        <button class="primary" id="addBtn" type="button">Add tenant</button>
+        <button id="resetBtn" type="button">Reset</button>
+      </div>
+      <div class="response" id="response">POST /api/towers/1/tenancies
+Waiting for a request.</div>
+    </div>
+  </div>
+</section>
+
+<section id="architecture">
+  <div class="sec-head">
+    <span class="eyebrow">Architecture</span>
+    <h2>Basic Clean Architecture, dependencies point inward</h2>
+    <p class="muted">Business rules live in Domain and Application, away from EF Core and HTTP. Later controllers for UC1 and UC4 plug into the same layers.</p>
+  </div>
+  <div class="diagram">
+    <svg viewBox="0 0 800 330" role="img" aria-label="Architecture: React client calls ASP.NET Core API, which depends on Application and Infrastructure; Application depends on Domain; Infrastructure implements Application abstractions and uses SQLite">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead" d="M0,0 L10,5 L0,10 z"/></marker>
+      </defs>
+      <!-- client -->
+      <rect class="box" x="20" y="120" width="160" height="80" rx="4"/>
+      <text class="t-title" x="34" y="150">React client</text>
+      <text class="t-attr" x="34" y="172">Vite + TypeScript</text>
+      <text class="t-attr" x="34" y="189">towerco_mgmt.client</text>
+      <!-- server -->
+      <rect class="box" x="240" y="120" width="170" height="80" rx="4"/>
+      <text class="t-title" x="254" y="150">API (Server)</text>
+      <text class="t-attr" x="254" y="172">Controllers, middleware</text>
+      <text class="t-attr" x="254" y="189">DI wiring, appsettings</text>
+      <!-- application -->
+      <rect class="box-acc" x="470" y="40" width="170" height="80" rx="4"/>
+      <text class="t-title" x="484" y="70">Application</text>
+      <text class="t-attr" x="484" y="92">Services, DTOs</text>
+      <text class="t-attr" x="484" y="109">Repo interfaces</text>
+      <!-- domain -->
+      <rect class="box-acc" x="680" y="40" width="105" height="80" rx="4"/>
+      <text class="t-title" x="694" y="70">Domain</text>
+      <text class="t-attr" x="694" y="92">Entities</text>
+      <text class="t-attr" x="694" y="109">Rules, errors</text>
+      <!-- infra -->
+      <rect class="box" x="470" y="200" width="170" height="80" rx="4"/>
+      <text class="t-title" x="484" y="230">Infrastructure</text>
+      <text class="t-attr" x="484" y="252">EF Core DbContext</text>
+      <text class="t-attr" x="484" y="269">Repositories, seed</text>
+      <!-- db -->
+      <ellipse cx="732" cy="212" rx="50" ry="12" class="box"/>
+      <path class="box" d="M682,212 v50 a50,12 0 0 0 100,0 v-50"/>
+      <text class="t-title" x="732" y="250" text-anchor="middle">SQLite</text>
+      <!-- edges -->
+      <line class="edge" x1="180" y1="160" x2="236" y2="160" marker-end="url(#arr)"/>
+      <text class="t-small" x="186" y="150">HTTP</text>
+      <line class="edge" x1="410" y1="145" x2="466" y2="95" marker-end="url(#arr)"/>
+      <line class="edge" x1="410" y1="175" x2="466" y2="230" marker-end="url(#arr)"/>
+      <line class="edge" x1="640" y1="80" x2="676" y2="80" marker-end="url(#arr)"/>
+      <line class="edge-dash" x1="555" y1="200" x2="555" y2="124" marker-end="url(#arr)"/>
+      <text class="t-small" x="562" y="168">implements</text>
+      <line class="edge" x1="640" y1="240" x2="678" y2="240" marker-end="url(#arr)"/>
+      <text class="t-small" x="20" y="316">Solid arrow: depends on. Dashed arrow: Infrastructure implements interfaces defined in Application. Tests project covers Domain and Application.</text>
+    </svg>
+  </div>
+</section>
+
+<section id="scope">
+  <div class="sec-head">
+    <span class="eyebrow">Phase 1 scope</span>
+    <h2>What the 40 minutes produce</h2>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Method</th><th>Route</th><th>Purpose</th><th>Use case</th></tr></thead>
+      <tbody>
+        <tr><td><span class="verb get">GET</span></td><td class="mono">/api/sites?country=&amp;status=&amp;search=</td><td>List and filter sites with capacity summary</td><td>UC3</td></tr>
+        <tr><td><span class="verb get">GET</span></td><td class="mono">/api/sites/{id}</td><td>Site, tower, tenancies, capacity and equipment in one view</td><td>UC3</td></tr>
+        <tr><td><span class="verb get">GET</span></td><td class="mono">/api/operators</td><td>Operators for the tenant picker</td><td>UC2</td></tr>
+        <tr><td><span class="verb post">POST</span></td><td class="mono">/api/towers/{towerId}/tenancies</td><td>Add operator as tenant, rules enforced</td><td>UC2</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="two-col">
+    <div class="panel">
+      <h3>Screens</h3>
+      <ol class="rules">
+        <li><b>Sites list</b>: country, status and text filters; tenants shown as <span class="mono">x/y</span> with capacity badge</li>
+        <li><b>Site detail</b>: site and tower info, capacity bar, tenancy table, equipment split by tenant and TowerCo shared</li>
+        <li><b>Add tenant form</b>: operator, start date, monthly rent; disabled when tower is full</li>
+      </ol>
+    </div>
+    <div class="panel">
+      <h3>Seed data</h3>
+      <p>4 countries (IN, ZA, KE, NG), about 12 sites with mixed statuses, about 5 fictional operators. Tenancies give a mix of full, partly used and empty towers so every rule can be shown. 8 equipment types; each active tower has shared power kit plus tenant radio gear.</p>
+      <h3>Out of scope</h3>
+      <p class="muted">Create or edit site, map and dashboard, login and roles, ending a tenancy, Azure hosting, pagination.</p>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Timebox</h3>
+    <div class="timebox" role="list">
+      <div class="tb" role="listitem" style="flex: 5"><span class="mins">0 to 5</span><span class="what">Scaffold, EF, seed</span></div>
+      <div class="tb" role="listitem" style="flex: 10"><span class="mins">5 to 15</span><span class="what">Domain, services, controllers, middleware</span></div>
+      <div class="tb" role="listitem" style="flex: 5"><span class="mins">15 to 20</span><span class="what">Unit tests</span></div>
+      <div class="tb ui" role="listitem" style="flex: 15"><span class="mins">20 to 35</span><span class="what">React: list, detail, add tenant</span></div>
+      <div class="tb" role="listitem" style="flex: 5"><span class="mins">35 to 40</span><span class="what">Build, test, demo</span></div>
+    </div>
+    <div class="ticks" aria-hidden="true"><span>0</span><span>10</span><span>20</span><span>30</span><span>40 min</span></div>
+  </div>
+</section>
+
+<section id="success">
+  <div class="sec-head">
+    <span class="eyebrow">Definition of success</span>
+    <h2>Done means every Must is ticked</h2>
+    <p class="muted">Tick items as they are verified. Ticks are kept in this browser only.</p>
+  </div>
+  <div class="panel progress">
+    <div class="progress-line"><span>Must items verified</span><span id="mustCount">0 / 0</span></div>
+    <div class="cap-bar"><div class="cap-fill" id="mustFill" style="width:0%"></div></div>
+  </div>
+  <div class="check-groups" id="checks"></div>
+</section>
+
+<section id="roadmap">
+  <div class="sec-head">
+    <span class="eyebrow">Roadmap</span>
+    <h2>Phases after this session</h2>
+  </div>
+  <div class="roadmap">
+    <div class="phase now">
+      <span class="phase-num">PHASE 1 &middot; NOW</span>
+      <h3>Browse and lease</h3>
+      <ul><li>UC3 find sites</li><li>UC2 assign tenants</li><li>Clean Architecture skeleton</li></ul>
+    </div>
+    <div class="phase">
+      <span class="phase-num">PHASE 2</span>
+      <h3>Manage sites</h3>
+      <ul><li>UC1 create site and tower</li><li>Edit details</li><li>Status transitions, validation</li><li>Add, edit, remove equipment</li></ul>
+    </div>
+    <div class="phase">
+      <span class="phase-num">PHASE 3</span>
+      <h3>Portfolio view</h3>
+      <ul><li>UC4 map coloured by utilisation</li><li>KPIs by country and status</li><li>Towers with free capacity</li></ul>
+    </div>
+    <div class="phase">
+      <span class="phase-num">PHASE 4</span>
+      <h3>Production shape</h3>
+      <ul><li>Role-based views</li><li>End tenancy, audit history</li><li>Azure App Service and Azure SQL</li></ul>
+    </div>
+  </div>
+</section>
+
+<section id="decisions">
+  <div class="sec-head">
+    <span class="eyebrow">Decisions and assumptions</span>
+    <h2>Agreed so far</h2>
+  </div>
+  <div class="decisions">
+    <div class="decision"><b>Slot-based capacity</b><span class="muted">MaxTenants per tower. Structural load later.</span></div>
+    <div class="decision"><b>SQLite</b><span class="muted">Zero setup; swap to Azure SQL by connection string.</span></div>
+    <div class="decision"><b>Equipment catalogue</b><span class="muted">Tenant-owned or TowerCo shared; types are data. Display only.</span></div>
+    <div class="decision"><b>Clean Architecture</b><span class="muted">Domain, Application, Infrastructure, Server, Tests.</span></div>
+    <div class="decision assume"><b>One tower per site</b><span class="muted">Assumption, simplifies Phase 1.</span></div>
+    <div class="decision assume"><b>No login in Phase 1</b><span class="muted">Personas are conceptual only.</span></div>
+    <div class="decision assume"><b>.NET 10 and Node 24</b><span class="muted">Matches installed SDKs.</span></div>
+  </div>
+</section>
+
+<footer>Source of truth: CLAUDE.md at the project root. All operator, site and rent data is fictional.</footer>
+</div>
+
+<script>
+(function () {
+  const OPERATORS = ["Aurora Mobile", "Bluewave Telecom", "Crestline Networks", "Delta Cell", "Lagoon Mobile"];
+  const INITIAL = ["Aurora Mobile", "Bluewave Telecom"];
+  const state = { tenants: INITIAL.slice() };
+  const el = (id) => document.getElementById(id);
+
+  OPERATORS.forEach((name) => { const o = document.createElement("option"); o.textContent = name; el("operator").appendChild(o); });
+  el("operator").value = "Crestline Networks";
+
+  function max() { return Number(el("maxTenants").value); }
+
+  function renderTower() {
+    const mast = el("mast"); mast.innerHTML = "";
+    for (let i = max() - 1; i >= 0; i--) {
+      const s = document.createElement("div");
+      const name = state.tenants[i];
+      s.className = "slot" + (name ? " taken" : "");
+      s.textContent = name || "free slot";
+      mast.appendChild(s);
+    }
+    const used = Math.min(state.tenants.length, max());
+    const pct = Math.round((used / max()) * 100);
+    el("capFill").style.width = pct + "%";
+    el("capFill").style.background = pct >= 100 ? "var(--bad)" : pct >= 67 ? "var(--warn)" : "var(--ok)";
+    el("capText").textContent = used + " of " + max() + " slots · " + pct + "%";
+  }
+
+  function evaluate(op) {
+    if (el("siteStatus").value !== "Active") return { code: 409, title: "SiteNotActive", detail: "Site status is " + el("siteStatus").value + ". Tenants can be added to Active sites only." };
+    if (state.tenants.includes(op)) return { code: 409, title: "DuplicateTenancy", detail: op + " already holds an active tenancy on this tower." };
+    if (state.tenants.length >= max()) return { code: 409, title: "TowerCapacityExceeded", detail: "All " + max() + " slots are taken." };
+    return { code: 201, title: "Created", detail: op + " added. " + (max() - state.tenants.length - 1) + " slot(s) left." };
+  }
+
+  function show(res, op) {
+    const box = el("response");
+    box.className = "response " + (res.code === 201 ? "ok" : "bad");
+    box.textContent = "POST /api/towers/1/tenancies\n{ \"operator\": \"" + op + "\" }\n\n" + res.code + " " + res.title + "\n" + res.detail;
+  }
+
+  el("addBtn").addEventListener("click", () => {
+    const op = el("operator").value;
+    const res = evaluate(op);
+    if (res.code === 201) state.tenants.push(op);
+    show(res, op); renderTower();
+  });
+  el("resetBtn").addEventListener("click", () => {
+    state.tenants = INITIAL.slice(); el("siteStatus").value = "Active"; el("maxTenants").value = "3";
+    el("response").className = "response"; el("response").textContent = "POST /api/towers/1/tenancies\nWaiting for a request.";
+    renderTower();
+  });
+  el("maxTenants").addEventListener("change", () => { state.tenants = state.tenants.slice(0, max()); renderTower(); });
+  renderTower();
+
+  const GROUPS = [
+    { title: "A. Demo script runs end to end", must: true, items: [
+      "Sites list loads from API with seeded data (4 countries, mixed statuses)",
+      "Filter by country, then status, then free text: list updates each time",
+      "Site detail shows site, tower, tenancies, capacity bar (x of y slots, %) and equipment by owner",
+      "Add operator to tower with free slots: tenancy appears, capacity updates",
+      "Full tower: add-tenant form disabled with no-capacity message",
+      "Same operator twice: clear 409 error shown in UI"] },
+    { title: "B. Technical gates", must: true, items: [
+      "dotnet build succeeds with zero errors",
+      "dotnet test all green; covers 4 business rules and site filtering",
+      "npm run build for client succeeds",
+      "API and client each start with one command; DB created and seeded on first run",
+      "No hardcoded constants, no secrets, methods under 15 lines"] },
+    { title: "C. Explainable design", must: true, items: [
+      "Explain domain model and derived capacity in under 2 minutes",
+      "Explain Clean Architecture layers and dependency direction",
+      "Point to where each business rule lives and its test"] },
+    { title: "D. Live-change ready", must: true, items: [
+      "Small change (new filter, new Site field, capacity rule) possible in under 5 minutes"] },
+    { title: "E. Stretch", must: false, items: [
+      "Capacity badge colours: free, nearly full, full",
+      "Architecture diagram exported for walkthrough",
+      "README with run steps"] }
+  ];
+  const KEY = "towerco-p1-checks";
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { saved = {}; }
+
+  function updateProgress() {
+    const musts = document.querySelectorAll("input[data-must='true']");
+    const done = Array.from(musts).filter((c) => c.checked).length;
+    el("mustCount").textContent = done + " / " + musts.length;
+    el("mustFill").style.width = Math.round((done / musts.length) * 100) + "%";
+  }
+
+  GROUPS.forEach((g, gi) => {
+    const box = document.createElement("div"); box.className = "check-group";
+    box.innerHTML = "<header><h3></h3><span class='chip " + (g.must ? "p1'>MUST" : "later'>SHOULD") + "</span></header>";
+    box.querySelector("h3").textContent = g.title;
+    g.items.forEach((text, ii) => {
+      const id = "chk-" + gi + "-" + ii;
+      const lab = document.createElement("label"); lab.className = "check-item"; lab.htmlFor = id;
+      const cb = document.createElement("input"); cb.type = "checkbox"; cb.id = id; cb.dataset.must = String(g.must); cb.checked = !!saved[id];
+      cb.addEventListener("change", () => { saved[id] = cb.checked; try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {} updateProgress(); });
+      const span = document.createElement("span"); span.textContent = text;
+      lab.append(cb, span); box.appendChild(lab);
+    });
+    el("checks").appendChild(box);
+  });
+  updateProgress();
+})();
+</script>

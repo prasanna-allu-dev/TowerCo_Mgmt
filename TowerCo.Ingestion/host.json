@@ -1,0 +1,14 @@
+{
+  "version": "2.0",
+  "logging": {
+    "logLevel": {
+      "default": "Information",
+      "TowerCo.Ingestion": "Information"
+    }
+  },
+  "extensions": {
+    "eventHubs": {
+      "maxEventBatchSize": 100
+    }
+  }
+}

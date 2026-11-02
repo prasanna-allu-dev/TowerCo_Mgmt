@@ -1,0 +1,23 @@
+# Build output
+bin/
+obj/
+dist/
+TestResults/
+coverage/
+
+# Dependencies
+node_modules/
+
+# IDE and tooling
+.vs/
+.vscode/
+.idea/
+.playwright-mcp/
+*.user
+
+# Local data and env
+*.db
+*.db-shm
+*.db-wal
+*.local
+.env.local

@@ -1,0 +1,19 @@
+@Ingestion_HostAddress = http://localhost:7071
+
+### Healthy reading
+POST {{Ingestion_HostAddress}}/api/telemetry
+Content-Type: application/json
+
+{ "siteCode": "IN-MUM-0001", "sensorType": "BatteryVoltage", "value": 52.1, "recordedAtUtc": "2026-11-02T09:00:00Z" }
+
+### Critical reading (raises alarm in the log)
+POST {{Ingestion_HostAddress}}/api/telemetry
+Content-Type: application/json
+
+{ "siteCode": "IN-MUM-0001", "sensorType": "ShelterTemperature", "value": 47.5, "recordedAtUtc": "2026-11-02T09:01:00Z" }
+
+### Invalid reading (400)
+POST {{Ingestion_HostAddress}}/api/telemetry
+Content-Type: application/json
+
+{ "siteCode": "", "sensorType": "Unknown", "value": 1 }

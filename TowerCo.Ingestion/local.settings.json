@@ -1,0 +1,22 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "IoTHubEventHubName": "towerco-telemetry",
+    "IoTHubConnection": "",
+    "AzureWebJobs.IngestFromIoTHub.Disabled": "true",
+    "AlarmThresholds__BatteryVoltage__Warning": "48",
+    "AlarmThresholds__BatteryVoltage__Critical": "46",
+    "AlarmThresholds__BatteryVoltage__Direction": "LowIsBad",
+    "AlarmThresholds__ShelterTemperature__Warning": "35",
+    "AlarmThresholds__ShelterTemperature__Critical": "45",
+    "AlarmThresholds__ShelterTemperature__Direction": "HighIsBad",
+    "AlarmThresholds__GeneratorFuelLevel__Warning": "30",
+    "AlarmThresholds__GeneratorFuelLevel__Critical": "15",
+    "AlarmThresholds__GeneratorFuelLevel__Direction": "LowIsBad",
+    "AlarmThresholds__TowerTilt__Warning": "0.5",
+    "AlarmThresholds__TowerTilt__Critical": "1.0",
+    "AlarmThresholds__TowerTilt__Direction": "HighIsBad"
+  }
+}

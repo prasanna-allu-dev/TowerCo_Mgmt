@@ -1,0 +1,9 @@
+<Solution>
+  <Project Path="TowerCo.Application/TowerCo.Application.csproj" />
+  <Project Path="TowerCo.Domain/TowerCo.Domain.csproj" />
+  <Project Path="TowerCo.Infrastructure/TowerCo.Infrastructure.csproj" />
+  <Project Path="TowerCo.Ingestion/TowerCo.Ingestion.csproj" />
+  <Project Path="TowerCo.Tests/TowerCo.Tests.csproj" />
+  <Project Path="towerco_mgmt.client/towerco_mgmt.client.esproj" />
+  <Project Path="TowerCo_Mgmt.Server/TowerCo_Mgmt.Server.csproj" />
+</Solution>

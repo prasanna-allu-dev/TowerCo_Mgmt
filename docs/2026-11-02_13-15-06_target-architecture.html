@@ -1,0 +1,532 @@
+<title>TowerCo Target Architecture</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: wide diagram bands in a single column; aviation orange marks proposed work, steel marks what is built today */
+:root {
+  --bg: #f4f6f7;
+  --surface: #ffffff;
+  --fg: #16212a;
+  --muted: #5a6872;
+  --line: #d5dde2;
+  --accent: #d9501a;
+  --accent-soft: #fbe6dc;
+  --steel: #2f5d7c;
+  --steel-soft: #e1ebf2;
+  --ok: #1f7a4d;
+  --ok-soft: #dcf1e5;
+  --warn: #a86a00;
+  --warn-soft: #fbefd6;
+  --bad: #b3261e;
+  --bad-soft: #f9e0de;
+  --display: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+  --body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1519; --surface: #172028; --fg: #e4eaee; --muted: #93a2ad; --line: #2b3842;
+    --accent: #ff7a3d; --accent-soft: #3a2116; --steel: #7fb2d6; --steel-soft: #1b2d3a;
+    --ok: #5cc98f; --ok-soft: #15301f; --warn: #e6b04a; --warn-soft: #33280f; --bad: #f08a80; --bad-soft: #3a1c1a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1519; --surface: #172028; --fg: #e4eaee; --muted: #93a2ad; --line: #2b3842;
+  --accent: #ff7a3d; --accent-soft: #3a2116; --steel: #7fb2d6; --steel-soft: #1b2d3a;
+  --ok: #5cc98f; --ok-soft: #15301f; --warn: #e6b04a; --warn-soft: #33280f; --bad: #f08a80; --bad-soft: #3a1c1a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1160px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 32px 64px; display: grid; gap: 48px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; line-height: 1.1; }
+h1 { font-size: clamp(2.2rem, 6vw, 3.4rem); font-weight: 700; }
+h2 { font-size: 1.75rem; font-weight: 600; }
+h3 { font-size: 1.2rem; font-weight: 600; }
+p { margin: 0; max-width: 72ch; }
+code, .mono { font-family: var(--mono); font-size: 0.85em; }
+.eyebrow { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+.muted { color: var(--muted); }
+section { display: grid; gap: 18px; min-width: 0; }
+.sec-head { display: grid; gap: 6px; }
+header.top { display: grid; gap: 14px; border-bottom: 2px solid var(--fg); padding-bottom: 24px; }
+.legend { display: flex; flex-wrap: wrap; gap: 10px 22px; font-size: 0.85rem; color: var(--muted); align-items: center; }
+.legend span { display: inline-flex; gap: 8px; align-items: center; }
+.sw { width: 22px; height: 14px; border-radius: 3px; display: inline-block; }
+.sw.built { background: var(--steel-soft); border: 1.5px solid var(--steel); }
+.sw.prop { background: var(--accent-soft); border: 1.5px solid var(--accent); }
+.sw.later { background: var(--surface); border: 1.5px dashed var(--muted); }
+.chip { display: inline-flex; align-items: center; font-family: var(--mono); font-size: 0.72rem; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.04em; white-space: nowrap; }
+.chip.built { background: var(--steel-soft); color: var(--steel); }
+.chip.prop { background: var(--accent-soft); color: var(--accent); }
+.chip.ok { background: var(--ok-soft); color: var(--ok); }
+.chip.warn { background: var(--warn-soft); color: var(--warn); }
+.chip.bad { background: var(--bad-soft); color: var(--bad); }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px; overflow-x: auto; }
+.diagram svg { display: block; width: 100%; height: auto; }
+#sys { min-width: 940px; }
+svg text { font-family: var(--body); fill: var(--fg); }
+svg .lane-t { font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; fill: var(--muted); }
+svg .n-t { font-family: var(--display); font-weight: 600; font-size: 17px; }
+svg .n-s { font-size: 11.5px; fill: var(--muted); }
+svg .lane { fill: var(--bg); stroke: none; }
+svg .n-built rect.b { fill: var(--steel-soft); stroke: var(--steel); stroke-width: 1.5; }
+svg .n-prop rect.b { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; }
+svg .n-later rect.b { fill: var(--surface); stroke: var(--muted); stroke-width: 1.3; stroke-dasharray: 5 4; }
+svg .mod { fill: var(--surface); stroke: var(--line); stroke-width: 1; }
+svg .flow { stroke: var(--fg); stroke-width: 1.4; fill: none; }
+svg .flow-hot { stroke: var(--bad); stroke-width: 1.6; fill: none; }
+svg .flow-cold { stroke: var(--muted); stroke-width: 1.3; fill: none; stroke-dasharray: 5 4; }
+svg .ah { fill: var(--fg); }
+svg .ah-hot { fill: var(--bad); }
+svg .ah-cold { fill: var(--muted); }
+svg .lbl { font-family: var(--mono); font-size: 10.5px; fill: var(--muted); }
+svg g.node { cursor: pointer; }
+svg g.node:focus { outline: none; }
+svg g.node:focus-visible rect.b, svg g.node.sel rect.b { stroke-width: 3; }
+svg g.node:hover rect.b { stroke-width: 2.4; }
+.sys-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 14px; align-items: start; }
+@media (max-width: 900px) { .sys-grid { grid-template-columns: 1fr; } }
+#detail h3 { font-size: 1.35rem; }
+#detail dl { margin: 0; display: grid; grid-template-columns: 82px 1fr; gap: 6px 10px; font-size: 0.88rem; }
+#detail dt { font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding-top: 2px; }
+#detail dd { margin: 0; }
+
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 500; }
+tr:last-child td { border-bottom: 0; }
+td.num { font-family: var(--mono); font-size: 0.8rem; white-space: nowrap; }
+
+.paths { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.path { border-top: 3px solid var(--line); padding-top: 10px; display: grid; gap: 6px; }
+.path.hot { border-top-color: var(--bad); }
+.path.warm { border-top-color: var(--warn); }
+.path.cold { border-top-color: var(--muted); }
+
+/* work order stepper */
+.wo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+.states { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.st { font: inherit; font-size: 0.82rem; padding: 7px 11px; border-radius: 4px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+.st[aria-current="step"] { background: var(--accent); color: var(--surface); border-color: var(--accent); font-weight: 600; }
+.st.done { background: var(--steel-soft); border-color: var(--steel); color: var(--steel); }
+.st:focus-visible, button:focus-visible { outline: 2px solid var(--steel); outline-offset: 2px; }
+.arrow-sep { color: var(--muted); font-family: var(--mono); font-size: 0.8rem; }
+.step-card { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.step-card .cell { display: grid; gap: 4px; align-content: start; }
+.step-card .k { font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; }
+button { font: inherit; font-size: 0.88rem; padding: 7px 12px; border-radius: 4px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--surface); font-weight: 600; }
+.side-paths { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.side { border-left: 3px solid var(--warn); padding: 4px 0 4px 12px; display: grid; gap: 4px; }
+.side.cancel { border-left-color: var(--muted); }
+
+.two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+ul.tight { margin: 0; padding-left: 18px; display: grid; gap: 5px; font-size: 0.9rem; }
+.roadmap { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--surface); }
+.phase { padding: 16px; display: grid; gap: 8px; align-content: start; border-right: 1px solid var(--line); }
+.phase:last-child { border-right: 0; }
+.phase.now { background: var(--steel-soft); }
+.phase-num { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); letter-spacing: 0.08em; }
+.decisions { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.decision { border-left: 3px solid var(--ok); padding: 4px 0 4px 12px; display: grid; gap: 4px; }
+.decision.open { border-left-color: var(--warn); }
+.decision b { font-family: var(--display); font-size: 1.1rem; font-weight: 600; }
+footer { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; }
+</style>
+
+<div class="wrap">
+
+<header class="top">
+  <span class="eyebrow">Target architecture &middot; proposed, not approved</span>
+  <h1>TowerCo Tower Management System</h1>
+  <p>How the system grows from today's sites and tenancies app into a platform that reads sensors on every tower, raises alarms, and runs work orders through to closure. Everything outside Phase 1 is a proposal for discussion.</p>
+  <div class="legend">
+    <span><i class="sw built"></i>Built or in Phase 1</span>
+    <span><i class="sw prop"></i>Proposed: monitoring and work orders</span>
+    <span><i class="sw later"></i>Proposed: Azure and field rollout</span>
+  </div>
+</header>
+
+<section id="system">
+  <div class="sec-head">
+    <span class="eyebrow">System view</span>
+    <h2>From tower sensor to technician and back</h2>
+    <p class="muted">Select any component to see its job, technology and phase. Red lines are the alarm path; dashed lines are the cold archive path.</p>
+  </div>
+  <div class="sys-grid">
+    <div class="diagram">
+      <svg id="sys" viewBox="0 0 1100 640" role="img" aria-label="System architecture: tower sensors and site gateway send telemetry to IoT Hub; a stream processor evaluates alarm rules and publishes alarms to Service Bus; the TowerCo API and worker create work orders, store data in Azure SQL, and push updates to the React web app, technician app and operator notifications.">
+        <defs>
+          <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah-hot" d="M0,0 L10,5 L0,10 z"/></marker>
+          <marker id="ac" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah-cold" d="M0,0 L10,5 L0,10 z"/></marker>
+        </defs>
+        <rect class="lane" x="10" y="10" width="220" height="530" rx="6"/>
+        <rect class="lane" x="244" y="10" width="232" height="530" rx="6"/>
+        <rect class="lane" x="490" y="10" width="340" height="530" rx="6"/>
+        <rect class="lane" x="844" y="10" width="246" height="530" rx="6"/>
+        <text class="lane-t" x="24" y="34">FIELD (TOWER SITE)</text>
+        <text class="lane-t" x="258" y="34">INGESTION</text>
+        <text class="lane-t" x="504" y="34">CORE PLATFORM</text>
+        <text class="lane-t" x="858" y="34">PEOPLE AND CHANNELS</text>
+
+        <!-- field -->
+        <g class="node n-later" data-id="sensors" tabindex="0" role="button" aria-label="Tower sensors">
+          <rect class="b" x="24" y="56" width="192" height="214" rx="5"/>
+          <text class="n-t" x="38" y="80">Tower sensors</text>
+          <text class="n-s" x="38" y="104">Power meter (grid, generator)</text>
+          <text class="n-s" x="38" y="124">Battery bank monitor</text>
+          <text class="n-s" x="38" y="144">Generator fuel and status</text>
+          <text class="n-s" x="38" y="164">Shelter temperature</text>
+          <text class="n-s" x="38" y="184">Door contact</text>
+          <text class="n-s" x="38" y="204">Aviation obstruction light</text>
+          <text class="n-s" x="38" y="224">Tilt and vibration</text>
+          <text class="n-s" x="38" y="252">Modbus, SNMP, dry contacts</text>
+        </g>
+        <g class="node n-later" data-id="gateway" tabindex="0" role="button" aria-label="Site gateway">
+          <rect class="b" x="24" y="312" width="192" height="66" rx="5"/>
+          <text class="n-t" x="38" y="338">Site gateway</text>
+          <text class="n-s" x="38" y="360">Edge RTU, MQTT over cellular</text>
+        </g>
+        <g class="node n-prop" data-id="sim" tabindex="0" role="button" aria-label="Telemetry simulator">
+          <rect class="b" x="24" y="420" width="192" height="66" rx="5"/>
+          <text class="n-t" x="38" y="446">Telemetry simulator</text>
+          <text class="n-s" x="38" y="468">.NET console, demo source</text>
+        </g>
+
+        <!-- ingestion -->
+        <g class="node n-later" data-id="bus" tabindex="0" role="button" aria-label="Alarm topic, Service Bus">
+          <rect class="b" x="258" y="56" width="204" height="66" rx="5"/>
+          <text class="n-t" x="272" y="82">Alarm topic</text>
+          <text class="n-s" x="272" y="104">Service Bus: tower-alarms</text>
+        </g>
+        <g class="node n-later" data-id="stream" tabindex="0" role="button" aria-label="Stream processor">
+          <rect class="b" x="258" y="176" width="204" height="72" rx="5"/>
+          <text class="n-t" x="272" y="202">Stream processor</text>
+          <text class="n-s" x="272" y="222">Functions: normalise,</text>
+          <text class="n-s" x="272" y="238">aggregate, evaluate rules</text>
+        </g>
+        <g class="node n-later" data-id="iothub" tabindex="0" role="button" aria-label="Azure IoT Hub">
+          <rect class="b" x="258" y="312" width="204" height="66" rx="5"/>
+          <text class="n-t" x="272" y="338">Azure IoT Hub</text>
+          <text class="n-s" x="272" y="360">Device identity, twin config</text>
+        </g>
+        <g class="node n-later" data-id="lake" tabindex="0" role="button" aria-label="Raw archive">
+          <rect class="b" x="258" y="430" width="204" height="66" rx="5"/>
+          <text class="n-t" x="272" y="456">Raw archive</text>
+          <text class="n-s" x="272" y="478">Data Lake, every reading</text>
+        </g>
+
+        <!-- core -->
+        <g class="node n-built" data-id="api" tabindex="0" role="button" aria-label="TowerCo API">
+          <rect class="b" x="504" y="56" width="312" height="236" rx="5"/>
+          <text class="n-t" x="518" y="82">TowerCo API</text>
+          <text class="n-s" x="518" y="102">ASP.NET Core, Clean Architecture modules</text>
+          <rect class="mod" x="518" y="118" width="138" height="72" rx="4"/>
+          <text class="n-t" x="530" y="144" style="font-size:15px">Portfolio</text>
+          <text class="n-s" x="530" y="164">Sites, towers</text>
+          <text class="n-s" x="530" y="180">equipment</text>
+          <rect class="mod" x="664" y="118" width="138" height="72" rx="4"/>
+          <text class="n-t" x="676" y="144" style="font-size:15px">Commercial</text>
+          <text class="n-s" x="676" y="164">Tenancies</text>
+          <text class="n-s" x="676" y="180">capacity rules</text>
+          <rect class="mod" x="518" y="200" width="138" height="78" rx="4" style="stroke: var(--accent)"/>
+          <text class="n-t" x="530" y="226" style="font-size:15px">Monitoring</text>
+          <text class="n-s" x="530" y="246">Sensors, alarms</text>
+          <text class="n-s" x="530" y="262">tower health</text>
+          <rect class="mod" x="664" y="200" width="138" height="78" rx="4" style="stroke: var(--accent)"/>
+          <text class="n-t" x="676" y="226" style="font-size:15px">Work orders</text>
+          <text class="n-s" x="676" y="246">Lifecycle, SLA</text>
+          <text class="n-s" x="676" y="262">assignment</text>
+        </g>
+        <g class="node n-prop" data-id="worker" tabindex="0" role="button" aria-label="Alarm and work order worker">
+          <rect class="b" x="504" y="330" width="312" height="66" rx="5"/>
+          <text class="n-t" x="518" y="356">Alarm and work order worker</text>
+          <text class="n-s" x="518" y="378">Hosted service: consume, dedupe, open, escalate</text>
+        </g>
+        <g class="node n-built" data-id="db" tabindex="0" role="button" aria-label="Database">
+          <rect class="b" x="504" y="430" width="150" height="66" rx="5"/>
+          <text class="n-t" x="518" y="456">Database</text>
+          <text class="n-s" x="518" y="478">SQLite now, Azure SQL</text>
+        </g>
+        <g class="node n-later" data-id="blob" tabindex="0" role="button" aria-label="Blob storage">
+          <rect class="b" x="666" y="430" width="150" height="66" rx="5"/>
+          <text class="n-t" x="680" y="456">Blob storage</text>
+          <text class="n-s" x="680" y="478">Job photos, reports</text>
+        </g>
+
+        <!-- people -->
+        <g class="node n-built" data-id="web" tabindex="0" role="button" aria-label="React web app">
+          <rect class="b" x="858" y="56" width="218" height="72" rx="5"/>
+          <text class="n-t" x="872" y="82">React web app</text>
+          <text class="n-s" x="872" y="102">Ops, commercial, manager</text>
+          <text class="n-s" x="872" y="118">alarm board, WO queue</text>
+        </g>
+        <g class="node n-later" data-id="signalr" tabindex="0" role="button" aria-label="SignalR live updates">
+          <rect class="b" x="858" y="168" width="218" height="66" rx="5"/>
+          <text class="n-t" x="872" y="194">Live updates</text>
+          <text class="n-s" x="872" y="216">SignalR: alarms, WO status</text>
+        </g>
+        <g class="node n-later" data-id="tech" tabindex="0" role="button" aria-label="Technician app">
+          <rect class="b" x="858" y="276" width="218" height="72" rx="5"/>
+          <text class="n-t" x="872" y="302">Technician app</text>
+          <text class="n-s" x="872" y="322">PWA: jobs, site check-in,</text>
+          <text class="n-s" x="872" y="338">photos, complete</text>
+        </g>
+        <g class="node n-later" data-id="notify" tabindex="0" role="button" aria-label="Operator notifications">
+          <rect class="b" x="858" y="390" width="218" height="72" rx="5"/>
+          <text class="n-t" x="872" y="416">Operator notifications</text>
+          <text class="n-s" x="872" y="436">Email, webhook to tenant</text>
+          <text class="n-s" x="872" y="452">operators on impact</text>
+        </g>
+
+        <!-- flows -->
+        <line class="flow" x1="120" y1="270" x2="120" y2="308" marker-end="url(#a)"/>
+        <line class="flow" x1="216" y1="345" x2="254" y2="345" marker-end="url(#a)"/>
+        <path class="flow" d="M216 453 L236 453 L236 365 L254 365" marker-end="url(#a)"/>
+        <line class="flow" x1="360" y1="312" x2="360" y2="252" marker-end="url(#a)"/>
+        <line class="flow-cold" x1="360" y1="378" x2="360" y2="426" marker-end="url(#ac)"/>
+        <line class="flow-hot" x1="360" y1="176" x2="360" y2="126" marker-end="url(#ah)"/>
+        <text class="lbl" x="366" y="156">alarm</text>
+        <path class="flow" d="M462 222 L484 222 L484 452 L500 452" marker-end="url(#a)"/>
+        <text class="lbl" x="408" y="276">aggregates</text>
+        <path class="flow-hot" d="M462 89 L478 89 L478 350 L500 350" marker-end="url(#ah)"/>
+        <line class="flow" x1="580" y1="396" x2="580" y2="426" marker-end="url(#a)"/>
+        <line class="flow" x1="740" y1="396" x2="740" y2="426" marker-end="url(#a)"/>
+        <line class="flow" x1="660" y1="330" x2="660" y2="296" marker-end="url(#a)"/>
+        <line class="flow" x1="854" y1="92" x2="820" y2="92" marker-end="url(#a)"/>
+        <line class="flow" x1="820" y1="110" x2="854" y2="110" marker-end="url(#a)"/>
+        <path class="flow" d="M816 200 L854 200" marker-end="url(#a)"/>
+        <line class="flow" x1="967" y1="168" x2="967" y2="132" marker-end="url(#a)"/>
+        <line class="flow" x1="854" y1="312" x2="820" y2="270" marker-end="url(#a)"/>
+        <path class="flow-hot" d="M816 372 L836 372 L836 426 L854 426" marker-end="url(#ah)"/>
+
+        <!-- cross cutting -->
+        <rect x="10" y="560" width="1080" height="68" rx="6" fill="var(--surface)" stroke="var(--line)"/>
+        <text class="lane-t" x="24" y="582">CROSS-CUTTING</text>
+        <text class="n-s" x="24" y="608" style="font-size:12.5px">Entra ID sign-in and roles (operations, commercial, manager, technician)  &#183;  Key Vault for secrets and device keys  &#183;  Application Insights and Azure Monitor  &#183;  Bicep and GitHub Actions  &#183;  Static Web Apps and App Service hosting</text>
+      </svg>
+    </div>
+    <aside class="panel" id="detail" aria-live="polite"></aside>
+  </div>
+</section>
+
+<section id="sensors">
+  <div class="sec-head">
+    <span class="eyebrow">Sensors</span>
+    <h2>What each tower reports</h2>
+    <p class="muted">Thresholds below are proposed starting values for design discussion, not taken from a standard. They live in configuration (alarm rules table and device twin), so operations can tune them without a release.</p>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Sensor</th><th>Measures</th><th>Unit</th><th>Send rate</th><th>Proposed alarm rule</th><th>Linked to</th></tr></thead>
+      <tbody>
+        <tr><td>Power meter</td><td>Mains present, load, active source</td><td class="num">V, A</td><td class="num">1 min</td><td><span class="chip bad">Critical</span> mains lost for 5 min</td><td>Tower (shared)</td></tr>
+        <tr><td>Battery bank monitor</td><td>Voltage, state of charge</td><td class="num">V, %</td><td class="num">1 min</td><td><span class="chip warn">Warning</span> below 40% &middot; <span class="chip bad">Critical</span> below 20%</td><td>Battery Bank</td></tr>
+        <tr><td>Generator controller</td><td>Fuel level, run hours, start result</td><td class="num">%, h</td><td class="num">5 min</td><td><span class="chip warn">Warning</span> fuel below 25% &middot; <span class="chip bad">Critical</span> failed start</td><td>Diesel Generator</td></tr>
+        <tr><td>Shelter climate</td><td>Temperature, humidity</td><td class="num">&deg;C, %</td><td class="num">5 min</td><td><span class="chip warn">Warning</span> above 35 &deg;C &middot; <span class="chip bad">Critical</span> above 45 &deg;C</td><td>Air Conditioner</td></tr>
+        <tr><td>Door contact</td><td>Open or closed</td><td class="num">state</td><td class="num">on change</td><td><span class="chip bad">Critical</span> opened with no technician checked in</td><td>Site</td></tr>
+        <tr><td>Aviation obstruction light</td><td>Lamp working</td><td class="num">state</td><td class="num">on change</td><td><span class="chip bad">Critical</span> lamp failure</td><td>Tower (shared)</td></tr>
+        <tr><td>Tilt and vibration</td><td>Mast tilt angle</td><td class="num">degrees</td><td class="num">15 min</td><td><span class="chip warn">Warning</span> change above 0.5&deg; from baseline</td><td>Tower structure</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="muted">The door rule joins the two halves of the design: the same door opening is an intrusion alarm when nobody is booked, and expected activity when a technician has checked in on an open work order.</p>
+</section>
+
+<section id="telemetry">
+  <div class="sec-head">
+    <span class="eyebrow">Telemetry flow</span>
+    <h2>One reading, three paths</h2>
+  </div>
+  <div class="paths">
+    <div class="path hot"><h3>Hot path: alarms</h3><p>Stream processor checks each reading against the alarm rule for its sensor type. A breach that lasts the rule's duration publishes <code>AlarmRaised</code> to the Service Bus topic. The worker keeps one active alarm per tower and sensor, so a flapping sensor does not open ten work orders.</p></div>
+    <div class="path warm"><h3>Warm path: health and trends</h3><p>Readings are rolled up to one row per sensor per minute and written to the database. The tower health page and 30-day trend charts read these rows; the API never queries raw telemetry.</p></div>
+    <div class="path cold"><h3>Cold path: archive</h3><p>IoT Hub routes every raw message to the Data Lake. Used for audits, model training and replaying history if an alarm rule changes. Nothing in the app reads it directly.</p></div>
+  </div>
+</section>
+
+<section id="workorders">
+  <div class="sec-head">
+    <span class="eyebrow">Work order flow</span>
+    <h2>Walk an alarm through to closure</h2>
+    <p class="muted">Example on seeded site IN-DEL-0002 (Dwarka Sector 12): mains power drops and the shared Diesel Generator fails to start. Step through to see who acts, what is stored and who is told. Fictional data.</p>
+  </div>
+  <div class="panel wo">
+    <div class="states" id="states" role="tablist" aria-label="Work order states"></div>
+    <div class="step-card" id="stepCard"></div>
+    <div class="controls">
+      <button type="button" id="prevBtn">Previous</button>
+      <button type="button" class="primary" id="nextBtn">Next step</button>
+    </div>
+  </div>
+  <div class="side-paths">
+    <div class="side"><b>Escalated</b><span class="muted">When the work order is not completed by its SLA due time, a scheduled Service Bus message wakes the worker. It raises priority, notifies the regional manager and logs a <code>WorkOrderEvent</code>. The order stays with the same assignee unless reassigned.</span></div>
+    <div class="side cancel"><b>Cancelled</b><span class="muted">From Open or Triaged only. Typical case: the alarm clears by itself before anyone is dispatched (for example mains returns). Cancelling needs a reason and is kept in the audit trail.</span></div>
+    <div class="side"><b>Reopened</b><span class="muted">If verification fails because telemetry goes back over the threshold, the order returns to Assigned with the same history, so repeat faults are visible.</span></div>
+  </div>
+</section>
+
+<section id="domain">
+  <div class="sec-head">
+    <span class="eyebrow">Domain additions</span>
+    <h2>New entities hang off the existing hierarchy</h2>
+    <p class="muted">Site, Tower, Tenancy, Operator, Equipment and EquipmentType stay as they are. Work orders replace the simpler maintenance tickets in the earlier health plan.</p>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Entity</th><th>Key fields</th><th>Relationship</th></tr></thead>
+      <tbody>
+        <tr><td><b>Sensor</b></td><td class="mono">Id, TowerId, EquipmentId?, SensorType, DeviceId, Unit</td><td>Tower 1 : many; optionally watches one Equipment item</td></tr>
+        <tr><td><b>TelemetryReading</b></td><td class="mono">SensorId, MinuteUtc, Min, Max, Avg</td><td>Sensor 1 : many (per-minute roll-up)</td></tr>
+        <tr><td><b>AlarmRule</b></td><td class="mono">SensorType, Comparison, WarningValue, CriticalValue, DurationSeconds</td><td>Configuration, one per sensor type</td></tr>
+        <tr><td><b>Alarm</b></td><td class="mono">Id, TowerId, SensorId, Severity, Status, RaisedAtUtc, ClearedAtUtc?</td><td>Sensor 1 : many; Status: Active, Acknowledged, Cleared</td></tr>
+        <tr><td><b>WorkOrder</b></td><td class="mono">Id, TowerId, AlarmId?, EquipmentId?, Type, Priority, Status, AssigneeId?, SlaDueAtUtc, OpenedAtUtc, ClosedAtUtc?</td><td>Alarm 1 : 0..1; Type: Corrective, Preventive, Installation</td></tr>
+        <tr><td><b>WorkOrderEvent</b></td><td class="mono">WorkOrderId, FromStatus, ToStatus, ActorId, AtUtc, Note</td><td>WorkOrder 1 : many (audit trail)</td></tr>
+        <tr><td><b>Technician</b></td><td class="mono">Id, Name, Region, Contractor</td><td>Technician 1 : many WorkOrder</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="two-col">
+    <div class="panel">
+      <h3>Business rules (proposed)</h3>
+      <ul class="tight">
+        <li>Status moves only along allowed transitions, enforced by a <code>WorkOrderStateMachine</code> in Domain; illegal move raises <code>InvalidWorkOrderTransitionException</code> (409).</li>
+        <li>Critical alarm opens a corrective work order automatically; Warning goes to a triage queue.</li>
+        <li>SLA due time comes from priority, held in configuration.</li>
+        <li>Check-in is accepted only near the site's latitude and longitude.</li>
+        <li>Closing needs verification: telemetry stable below the warning value for a configured period, or a supervisor sign-off.</li>
+        <li>If affected equipment is tenant-owned, or the alarm puts tenant service at risk, the tenant operators are notified.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Where it lives in the code</h3>
+      <ul class="tight">
+        <li><b>Domain</b>: <code>Monitoring/</code> and <code>WorkOrders/</code> folders: entities, state machine, alarm evaluation rules (one class per rule, open for extension).</li>
+        <li><b>Application</b>: <code>IAlarmService</code>, <code>IWorkOrderService</code>, <code>INotificationSender</code>, <code>IWorkOrderDispatcher</code>.</li>
+        <li><b>Infrastructure</b>: EF configurations, Service Bus consumer as a hosted service, SignalR and email or webhook senders.</li>
+        <li><b>TowerCo.Ingestion</b> (new): Azure Functions project for the stream processor, reusing Domain alarm rules.</li>
+        <li><b>Server</b>: thin controllers and a SignalR hub. Same exception-to-ProblemDetails handler.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="roadmap">
+  <div class="sec-head">
+    <span class="eyebrow">Delivery</span>
+    <h2>Build it in this order</h2>
+  </div>
+  <div class="roadmap">
+    <div class="phase now"><span class="phase-num">PHASE 1 &middot; NOW</span><h3>Portfolio and leasing</h3><ul class="tight"><li>Sites, towers, tenancies, equipment</li><li>Capacity rules, overview KPIs</li><li>React + API + SQLite</li></ul></div>
+    <div class="phase"><span class="phase-num">PHASE 5</span><h3>Monitoring</h3><ul class="tight"><li>Sensor, reading, alarm rule, alarm</li><li>Simulator posts straight to the API</li><li>Tower health page, alarm board</li></ul></div>
+    <div class="phase"><span class="phase-num">PHASE 6</span><h3>Work orders</h3><ul class="tight"><li>Lifecycle and state machine</li><li>Auto-open on Critical, SLA escalation</li><li>Assignment, live updates</li></ul></div>
+    <div class="phase"><span class="phase-num">PHASE 7</span><h3>Azure and field</h3><ul class="tight"><li>IoT Hub, Functions, Service Bus</li><li>Azure SQL, Entra ID roles</li><li>Technician app, operator notifications</li></ul></div>
+  </div>
+  <p class="muted">Phases 5 and 6 run without any Azure services: the simulator calls the API, and an in-process queue stands in for Service Bus behind the same interface. Phase 7 swaps in the cloud pieces without touching Domain or Application code.</p>
+</section>
+
+<section id="decisions">
+  <div class="sec-head">
+    <span class="eyebrow">Decisions and open questions</span>
+    <h2>What this design commits to</h2>
+  </div>
+  <div class="decisions">
+    <div class="decision"><b>Modular monolith</b><span class="muted">One API, clear modules. Split into services only if load or team size needs it.</span></div>
+    <div class="decision"><b>Event-driven ingestion</b><span class="muted">Telemetry never hits the API directly in production; Service Bus decouples bursts from the app.</span></div>
+    <div class="decision"><b>Rules in Domain</b><span class="muted">Alarm and work order rules are plain classes, shared by the API and the Functions project, fully unit tested.</span></div>
+    <div class="decision open"><b>Telemetry store</b><span class="muted">Per-minute roll-ups in Azure SQL, or Azure Data Explorer if sensor count grows. To decide.</span></div>
+    <div class="decision open"><b>Own or integrate work orders</b><span class="muted">Build in-house as shown, or hand off to an existing maintenance system through an adapter. To decide.</span></div>
+    <div class="decision open"><b>Auto-open threshold</b><span class="muted">Critical only, or also repeated Warnings within a window. To decide with operations.</span></div>
+  </div>
+</section>
+
+<footer>Proposal only. Source of truth for agreed scope: CLAUDE.md at the project root. Sites, operators and readings are fictional.</footer>
+</div>
+
+<script>
+(function () {
+  const NODES = {
+    sensors: { t: "Tower sensors", phase: "Phase 7", role: "Measure power, battery, fuel, temperature, door, aviation light and tilt at each tower.", tech: "Modbus, SNMP and dry-contact sensors wired to the site gateway.", data: "Raw readings with sensor id and timestamp." },
+    gateway: { t: "Site gateway", phase: "Phase 7", role: "Polls local sensors, buffers readings when the link drops, and sends them upstream.", tech: "Edge RTU with MQTT over cellular, X.509 identity in IoT Hub.", data: "Batched telemetry messages; receives threshold config from the device twin." },
+    sim: { t: "Telemetry simulator", phase: "Phase 5", role: "Generates realistic readings for every seeded tower, including planted faults, so monitoring and work orders can be demoed without hardware.", tech: ".NET console app. Phase 5: posts to the API. Phase 7: sends to IoT Hub as a fake device.", data: "Same message shape as the real gateway." },
+    iothub: { t: "Azure IoT Hub", phase: "Phase 7", role: "Single entry point for all towers. Authenticates each gateway and routes messages.", tech: "Azure IoT Hub with message routing and device twins.", data: "Routes every message to the stream processor and the raw archive." },
+    stream: { t: "Stream processor", phase: "Phase 7", role: "Normalises units, rolls readings up per minute, and checks alarm rules.", tech: "Azure Functions (isolated .NET) in a new TowerCo.Ingestion project, reusing Domain alarm rule classes.", data: "Writes per-minute rows to the database; publishes AlarmRaised and AlarmCleared." },
+    lake: { t: "Raw archive", phase: "Phase 7", role: "Keeps every raw reading for audit, analytics and replay.", tech: "Azure Data Lake Storage Gen2, partitioned by date and tower.", data: "Append-only; nothing in the app reads it directly." },
+    bus: { t: "Alarm topic", phase: "Phase 7 (in-process queue in Phases 5 and 6)", role: "Decouples alarm bursts from the app so a regional power cut does not overload the API.", tech: "Azure Service Bus topic tower-alarms, with scheduled messages for SLA timers.", data: "AlarmRaised, AlarmCleared, SlaDue events." },
+    api: { t: "TowerCo API", phase: "Built (Portfolio, Commercial); Phases 5 and 6 add Monitoring and Work orders", role: "Serves the web app and technician app. Business rules live in Domain and Application, controllers stay thin.", tech: "ASP.NET Core on .NET 10, EF Core, ProblemDetails error handling, Scalar API reference.", data: "Reads and writes the database; pushes changes to SignalR." },
+    worker: { t: "Alarm and work order worker", phase: "Phase 6", role: "Consumes alarm events, keeps one active alarm per tower and sensor, opens work orders, runs SLA escalation and verification.", tech: "Hosted service inside the API process at first; can move to its own container later.", data: "Alarm, WorkOrder and WorkOrderEvent rows; sends notifications." },
+    db: { t: "Database", phase: "Built (SQLite); Azure SQL in Phase 7", role: "System of record for portfolio, tenancies, equipment, alarms and work orders, plus per-minute telemetry roll-ups.", tech: "SQLite file today; Azure SQL by connection string change.", data: "All entities; index on SensorId and MinuteUtc for trends." },
+    blob: { t: "Blob storage", phase: "Phase 7", role: "Stores photos and reports uploaded by technicians when completing jobs.", tech: "Azure Blob Storage with short-lived SAS links issued by the API.", data: "Files referenced from WorkOrderEvent notes." },
+    web: { t: "React web app", phase: "Built (portfolio screens); Phases 5 and 6 add alarm board and WO queue", role: "Main screen for operations, commercial users and managers.", tech: "React with Vite and TypeScript; typed API clients.", data: "Calls the API over HTTPS; receives live updates." },
+    signalr: { t: "Live updates", phase: "Phase 6", role: "Pushes new alarms and work order status changes so screens update without refresh.", tech: "ASP.NET Core SignalR hub; Azure SignalR Service when scaled out.", data: "AlarmChanged and WorkOrderChanged messages." },
+    tech: { t: "Technician app", phase: "Phase 7", role: "Lets field technicians see assigned jobs, check in at the site, add notes and photos, and complete work.", tech: "Progressive web app sharing the React codebase; location used only for check-in.", data: "Calls work order endpoints; uploads photos to Blob." },
+    notify: { t: "Operator notifications", phase: "Phase 7", role: "Tells tenant operators when an alarm affects their equipment or service, and when it is restored.", tech: "Email and signed webhooks behind INotificationSender.", data: "Notification log per tenancy." }
+  };
+
+  const detail = document.getElementById("detail");
+  const nodes = document.querySelectorAll("#sys g.node");
+
+  function show(id) {
+    const n = NODES[id];
+    nodes.forEach((g) => g.classList.toggle("sel", g.dataset.id === id));
+    detail.innerHTML = "<span class='eyebrow'>Component</span><h3></h3><dl><dt>Phase</dt><dd data-k='phase'></dd><dt>Job</dt><dd data-k='role'></dd><dt>Tech</dt><dd data-k='tech'></dd><dt>Data</dt><dd data-k='data'></dd></dl>";
+    detail.querySelector("h3").textContent = n.t;
+    ["phase", "role", "tech", "data"].forEach((k) => { detail.querySelector("[data-k='" + k + "']").textContent = n[k]; });
+  }
+  nodes.forEach((g) => {
+    g.addEventListener("click", () => show(g.dataset.id));
+    g.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); show(g.dataset.id); } });
+  });
+  show("worker");
+
+  const STEPS = [
+    { s: "Alarm raised", who: "Stream processor", what: "At IN-DEL-0002 the power meter reports mains lost and the generator controller reports a failed start. The tower is on battery. AlarmRaised is published.", stored: "Alarm: Critical, Active", told: "Alarm board updates live" },
+    { s: "Open", who: "Worker", what: "No active alarm exists for this tower and sensor, so it keeps this one and, because it is Critical, opens a corrective work order linked to the Diesel Generator (TowerCo shared).", stored: "WorkOrder: Open, priority from severity, SLA due time from config", told: "Operations queue" },
+    { s: "Triaged", who: "Operations user", what: "Confirms priority and checks impact. Both tenants on this tower (Aurora Mobile, Bluewave Telecom) lose service when the Battery Bank runs down.", stored: "WorkOrderEvent: Open to Triaged", told: "Aurora Mobile and Bluewave Telecom: service at risk" },
+    { s: "Assigned", who: "Operations user", what: "Assigns the nearest technician for the Delhi region. The job appears in the technician app.", stored: "WorkOrder.AssigneeId set", told: "Technician" },
+    { s: "In progress", who: "Technician", what: "Checks in at the site; location is matched to the site coordinates. The door opens, and because a check-in exists the door sensor does not raise an intrusion alarm.", stored: "WorkOrderEvent: check-in with time", told: "Live status on web app" },
+    { s: "Completed", who: "Technician", what: "Clears the generator fault, test-runs it on load, adds notes and photos, marks the job complete.", stored: "Photos in Blob; WorkOrderEvent: Completed", told: "Operations" },
+    { s: "Verified", who: "Worker", what: "Watches telemetry. The generator stays running and battery charge recovers for the configured period, so the alarm clears and the order is verified. If the fault returns, the order reopens.", stored: "Alarm: Cleared; WorkOrder: Verified", told: "Alarm board clears" },
+    { s: "Closed", who: "System", what: "Order closes. Time to restore and whether the SLA was met are recorded for the manager overview.", stored: "WorkOrder: Closed, ClosedAtUtc", told: "Tenants: service restored" }
+  ];
+  let idx = 0;
+  const statesEl = document.getElementById("states");
+  const card = document.getElementById("stepCard");
+
+  function renderStates() {
+    statesEl.innerHTML = "";
+    STEPS.forEach((step, i) => {
+      if (i > 0) { const sep = document.createElement("span"); sep.className = "arrow-sep"; sep.textContent = "→"; sep.setAttribute("aria-hidden", "true"); statesEl.appendChild(sep); }
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "st" + (i < idx ? " done" : ""); b.textContent = step.s;
+      if (i === idx) b.setAttribute("aria-current", "step");
+      b.addEventListener("click", () => { idx = i; render(); });
+      statesEl.appendChild(b);
+    });
+  }
+  function cell(k, v) { return "<div class='cell'><span class='k'>" + k + "</span><span></span></div>"; }
+  function renderCard() {
+    const st = STEPS[idx];
+    card.innerHTML = cell("Who acts") + cell("What happens") + cell("Stored") + cell("Who is told");
+    const spans = card.querySelectorAll(".cell span:not(.k)");
+    [st.who, st.what, st.stored, st.told].forEach((v, i) => { spans[i].textContent = v; });
+  }
+  function render() {
+    renderStates(); renderCard();
+    document.getElementById("prevBtn").disabled = idx === 0;
+    document.getElementById("nextBtn").textContent = idx === STEPS.length - 1 ? "Start again" : "Next step";
+  }
+  document.getElementById("nextBtn").addEventListener("click", () => { idx = idx === STEPS.length - 1 ? 0 : idx + 1; render(); });
+  document.getElementById("prevBtn").addEventListener("click", () => { if (idx > 0) { idx -= 1; render(); } });
+  render();
+})();
+</script>

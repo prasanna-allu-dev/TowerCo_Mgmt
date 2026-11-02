@@ -1,0 +1,17 @@
+.wo-form { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 16px; }
+.wo-form label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
+.wo-form .input { min-width: 0; color: inherit; }
+.wo-span-2 { grid-column: span 2; }
+.wo-span-3 { grid-column: 1 / -1; }
+.wo-actions, .wo-status-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.wo-actions { justify-content: flex-end; }
+.wo-btn { padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); font: inherit; font-size: 14px; cursor: pointer; }
+.wo-btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+.wo-btn.danger { color: var(--danger); border-color: var(--danger); }
+.wo-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.wo-status-actions .alert-error { flex-basis: 100%; }
+.table td .muted { font-size: 12px; margin-top: 2px; }
+@media (max-width: 720px) {
+    .wo-form { grid-template-columns: 1fr; }
+    .wo-span-2 { grid-column: auto; }
+}

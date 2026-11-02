@@ -1,0 +1,38 @@
+using TowerCo.Application.Constants;
+using TowerCo.Domain.Entities;
+
+namespace TowerCo.Application.Sites;
+
+/// <summary>Maps the tower aggregate (with its site) to API DTOs. Capacity is derived as of the given date.</summary>
+public static class SiteMapper
+{
+    public static CapacitySummaryDto ToCapacity(Tower tower, DateOnly asOf) => new(
+        tower.MaxTenants, tower.ActiveTenantCount(asOf), tower.AvailableSlots(asOf),
+        tower.UtilisationPercent(asOf), tower.HasCapacity(asOf));
+
+    public static SiteSummaryDto ToSummary(Tower tower, DateOnly asOf)
+    {
+        var site = tower.Site;
+        return new(site.Id, site.SiteCode, site.Name, site.Location.CountryCode, site.Location.City,
+            site.Status, tower.Id, ToCapacity(tower, asOf));
+    }
+
+    public static SiteDetailDto ToDetail(Tower tower, DateOnly asOf)
+    {
+        var site = tower.Site;
+        return new(site.Id, site.SiteCode, site.Name, site.Location.CountryCode, site.Location.City, site.Status,
+            tower.Id, ToCapacity(tower, asOf), site.Location.Latitude, site.Location.Longitude,
+            new TowerDto(tower.Id, tower.TowerType, tower.HeightMetres, tower.MaxTenants),
+            tower.Tenancies.OrderBy(t => t.StartDate).Select(ToTenancy).ToList(),
+            tower.Equipment.Select(ToEquipment).ToList());
+    }
+
+    public static TenancyDto ToTenancy(Tenancy tenancy) => new(
+        tenancy.Id, tenancy.OperatorId, tenancy.Operator.Name, tenancy.StartDate, tenancy.EndDate,
+        tenancy.MonthlyRent.Amount, tenancy.MonthlyRent.Currency);
+
+    private static EquipmentDto ToEquipment(Equipment equipment) => new(
+        equipment.Id, equipment.EquipmentType.Name, equipment.EquipmentType.Category,
+        equipment.Tenancy?.Operator.Name ?? DisplayLabels.SharedEquipmentOwner, equipment.Tenancy is null,
+        equipment.SerialNumber, equipment.InstalledOn, equipment.MountHeightMetres, equipment.Status);
+}
