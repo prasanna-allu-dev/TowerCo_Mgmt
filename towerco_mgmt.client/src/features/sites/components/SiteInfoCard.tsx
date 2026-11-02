@@ -1,7 +1,8 @@
+import type { ReactNode } from 'react';
 import { Card, StatusBadge } from '@/shared/components';
 import type { SiteDetail } from '@/features/sites/types';
 
-function SiteInfoCard({ site }: { site: SiteDetail }) {
+function SiteInfoCard({ site, children }: { site: SiteDetail; children?: ReactNode }) {
     return (
         <Card title="Site">
             <dl className="details">
@@ -10,6 +11,7 @@ function SiteInfoCard({ site }: { site: SiteDetail }) {
                 <dt>Location</dt><dd>{site.city}, {site.countryCode}</dd>
                 <dt>Coordinates</dt><dd className="mono">{site.latitude}, {site.longitude}</dd>
             </dl>
+            {children}
         </Card>
     );
 }

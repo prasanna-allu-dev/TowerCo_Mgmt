@@ -57,7 +57,7 @@ public sealed class PersistenceTests : IAsyncLifetime
         Assert.Equal("Mumbai", site.Location.City);
         Assert.False(site.Tower!.HasCapacity(Today));
         Assert.Equal("INR", site.Tower.Tenancies.First().MonthlyRent.Currency);
-        Assert.Contains(site.Tower.Equipment, e => e.Tenancy is null && e.EquipmentType.Category == EquipmentCategory.Power);
+        Assert.All(site.Tower.Equipment, e => Assert.Contains(e.Tenancy, site.Tower.Tenancies));
     }
 
     [Fact]
@@ -72,18 +72,15 @@ public sealed class PersistenceTests : IAsyncLifetime
         Assert.Equal(2, tower.Equipment.Count(e => e.Status == EquipmentStatus.Removed));
     }
 
-    [Theory]
-    [InlineData("IN-MUM-0001", "Solar Array")]
-    [InlineData("IN-DEL-0002", "Diesel Generator")]
-    public async Task Seed_SharedPower_DependsOnTowerType(string siteCode, string expectedPower)
+    [Fact]
+    public async Task Seed_EveryEquipment_OwnedByTenancyOnSameTower()
     {
         await using var context = CreateContext();
 
-        var sharedNames = await context.Equipment
-            .Where(e => e.Tower.Site.SiteCode == siteCode && e.TenancyId == null)
-            .Select(e => e.EquipmentType.Name).ToListAsync();
+        var equipment = await context.Equipment.Include(e => e.Tenancy).ToListAsync();
 
-        Assert.Equal(new[] { expectedPower, "Battery Bank" }.Order(), sharedNames.Order());
+        Assert.NotEmpty(equipment);
+        Assert.All(equipment, e => Assert.Equal(e.TowerId, e.Tenancy.TowerId));
     }
 
     [Fact]
@@ -92,13 +89,13 @@ public sealed class PersistenceTests : IAsyncLifetime
         await using var context = CreateContext();
 
         var equipment = await context.Equipment.Include(e => e.Tenancy).Include(e => e.Tower)
-            .FirstAsync(e => e.TenancyId != null);
+            .FirstAsync();
 
         Assert.True(equipment.Id > 0);
-        Assert.Equal(equipment.Tenancy!.Id, equipment.TenancyId);
+        Assert.Equal(equipment.Tenancy.Id, equipment.TenancyId);
         Assert.Equal(equipment.Tower.Id, equipment.TowerId);
         Assert.True(equipment.EquipmentTypeId > 0);
-        Assert.Equal(equipment.Tenancy!.TowerId, equipment.TowerId);
+        Assert.Equal(equipment.Tenancy.TowerId, equipment.TowerId);
         Assert.True(equipment.Tenancy.OperatorId > 0);
         Assert.True(equipment.Tower.SiteId > 0);
     }

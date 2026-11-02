@@ -1,5 +1,6 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import AppLayout from './layout/AppLayout';
+import LandingRedirect from './layout/LandingRedirect';
 import { SiteDetailPage, SitesPage } from '@/features/sites';
 import { OperatorsPage } from '@/features/operators';
 import { ConfigurationPage, CreateTowerSitePage } from '@/features/configuration';
@@ -27,7 +28,7 @@ function App() {
                     <Route path={ROUTES.workOrders} element={<WorkOrdersPage />} />
                     <Route path={ROUTES.workOrderDetail} element={<WorkOrderDetailPage />} />
                     <Route path={ROUTES.health} element={<HealthPage />} />
-                    <Route path="*" element={<Navigate to={ROUTES.sites} replace />} />
+                    <Route path="*" element={<LandingRedirect />} />
                 </Route>
             </Routes>
         </BrowserRouter>

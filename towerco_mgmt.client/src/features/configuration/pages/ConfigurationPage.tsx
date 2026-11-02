@@ -1,8 +1,9 @@
 import { ROUTES, sitePath } from '@/shared/constants/routes';
 import { Link, useNavigate } from 'react-router-dom';
 import { towersApi } from '@/features/configuration/api';
-import { CapacityBar, Card, StateMessage, StatusBadge } from '@/shared/components';
+import { CapacityBar, Card, Pagination, StateMessage, StatusBadge } from '@/shared/components';
 import { useApi } from '@/shared/hooks/useApi';
+import { usePagination } from '@/shared/hooks/usePagination';
 import PageHeader from '@/shared/components/PageHeader';
 import { countLabel } from '@/shared/utils/format';
 import type { TowerConfiguration } from '@/features/configuration/types';
@@ -22,6 +23,19 @@ function ConfigurationRow({ tower }: { tower: TowerConfiguration }) {
     );
 }
 
+function ConfigurationTable({ towers }: { towers: TowerConfiguration[] }) {
+    const paging = usePagination(towers);
+    return (
+        <>
+            <table className="table">
+                <thead><tr><th>Site</th><th>Name</th><th>Status</th><th>Type</th><th>Height</th><th>Max tenants</th><th>Utilisation</th></tr></thead>
+                <tbody>{paging.pageRows.map(t => <ConfigurationRow key={t.towerId} tower={t} />)}</tbody>
+            </table>
+            <Pagination {...paging} />
+        </>
+    );
+}
+
 function ConfigurationPage() {
     const { data, error, loading } = useApi(() => towersApi.list());
 
@@ -34,12 +48,7 @@ function ConfigurationPage() {
             />
             <Card title="Towers" subtitle={countLabel(data?.length, 'tower', 'towers')}>
                 <StateMessage loading={loading} error={error} empty={data?.length === 0} emptyText="No towers configured." />
-                {!!data?.length && (
-                    <table className="table">
-                        <thead><tr><th>Site</th><th>Name</th><th>Status</th><th>Type</th><th>Height</th><th>Max tenants</th><th>Utilisation</th></tr></thead>
-                        <tbody>{data.map(t => <ConfigurationRow key={t.towerId} tower={t} />)}</tbody>
-                    </table>
-                )}
+                {!!data?.length && <ConfigurationTable towers={data} />}
             </Card>
         </>
     );

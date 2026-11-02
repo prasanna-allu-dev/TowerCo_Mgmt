@@ -38,4 +38,48 @@ public sealed class Site : Entity
         Tower = new Tower(this, towerType, heightMetres, maxTenants);
         return Tower;
     }
+
+    /// <summary>
+    /// Moves the site along its lifecycle: Planned, UnderConstruction, Active, Decommissioned (no going back).
+    /// Activation needs a tower; decommissioning needs every tenancy ended on or before the given date.
+    /// </summary>
+    public void ChangeStatus(SiteStatus target, DateOnly asOf)
+    {
+        if (!AllowedTransitions[Status].Contains(target))
+        {
+            throw new InvalidSiteTransitionException(SiteCode, Status, target);
+        }
+        if (target == SiteStatus.Active && Tower is null)
+        {
+            throw new SiteHasNoTowerException(SiteCode);
+        }
+        if (target == SiteStatus.Decommissioned)
+        {
+            EnsureNoCommittedTenants(asOf);
+        }
+        Status = target;
+    }
+
+    public void Rename(string name)
+    {
+        Guard.AgainstBlank(name, nameof(name));
+        Name = name.Trim();
+    }
+
+    private void EnsureNoCommittedTenants(DateOnly asOf)
+    {
+        var committed = Tower?.Tenancies.Count(t => t.IsCommittedFrom(asOf)) ?? 0;
+        if (committed > 0)
+        {
+            throw new SiteHasActiveTenantsException(SiteCode, committed);
+        }
+    }
+
+    private static readonly Dictionary<SiteStatus, SiteStatus[]> AllowedTransitions = new()
+    {
+        [SiteStatus.Planned] = [SiteStatus.UnderConstruction, SiteStatus.Decommissioned],
+        [SiteStatus.UnderConstruction] = [SiteStatus.Active, SiteStatus.Decommissioned],
+        [SiteStatus.Active] = [SiteStatus.Decommissioned],
+        [SiteStatus.Decommissioned] = []
+    };
 }

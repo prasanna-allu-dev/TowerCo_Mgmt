@@ -34,22 +34,35 @@ public class TenancyAndEquipmentTests
     }
 
     [Fact]
-    public void Equipment_Remove_SetsRemovedStatus()
+    public void Equipment_Remove_SetsRemovedStatusAndKeepsOwner()
     {
-        var equipment = Tower().InstallEquipment(new EquipmentType("Generator", EquipmentCategory.Power), "SN-2", Today, null, null);
+        var tower = Tower();
+        var tenancy = tower.AddTenancy(Operator(), Today, null, Rent);
+        var equipment = tower.InstallEquipment(new EquipmentType("Generator", EquipmentCategory.Power), "SN-2", Today, null, tenancy);
 
         equipment.Remove();
 
         Assert.Equal(EquipmentStatus.Removed, equipment.Status);
-        Assert.Null(equipment.Tenancy);
+        Assert.Same(tenancy, equipment.Tenancy);
     }
 
     [Fact]
     public void Equipment_BlankSerial_Throws()
     {
+        var tower = Tower();
+        var tenancy = tower.AddTenancy(Operator(), Today, null, Rent);
         var type = new EquipmentType("Generator", EquipmentCategory.Power);
 
-        Assert.Throws<DomainValidationException>(() => Tower().InstallEquipment(type, "", Today, null, null));
+        Assert.Throws<DomainValidationException>(() => tower.InstallEquipment(type, "", Today, null, tenancy));
+    }
+
+    [Fact]
+    public void Equipment_TenancyOnAnotherTower_Throws()
+    {
+        var otherTenancy = Tower().AddTenancy(Operator(), Today, null, Rent);
+        var type = new EquipmentType("Dish", EquipmentCategory.Transmission);
+
+        Assert.Throws<InvalidEquipmentOwnerException>(() => Tower().InstallEquipment(type, "SN-3", Today, null, otherTenancy));
     }
 
     [Fact]

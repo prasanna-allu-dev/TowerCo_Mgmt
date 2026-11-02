@@ -1,10 +1,14 @@
 import { NavLink } from 'react-router-dom';
 import { APP_NAME, APP_SUBTITLE, NAV_GROUPS } from '@/app/navigation';
 import type { NavGroup, NavItem } from '@/app/navigation';
+import { filterNavGroups } from '@/app/personaNav';
+import { usePersona } from '@/app/usePersona';
+import { useSidebarExpanded } from './useSidebarExpanded';
 
 function NavEntry({ item }: { item: NavItem }) {
-    if (item.disabled) return <span className="nav-link disabled" title="Coming soon">{item.icon} {item.label}</span>;
-    return <NavLink to={item.path} className="nav-link">{item.icon} {item.label}</NavLink>;
+    const content = <><span className="nav-icon" aria-hidden="true">{item.icon}</span><span className="nav-text">{item.label}</span></>;
+    if (item.disabled) return <span className="nav-link disabled" title={`${item.label} (coming soon)`}>{content}</span>;
+    return <NavLink to={item.path} className="nav-link" title={item.label}>{content}</NavLink>;
 }
 
 function NavSection({ group }: { group: NavGroup }) {
@@ -16,19 +20,26 @@ function NavSection({ group }: { group: NavGroup }) {
     );
 }
 
-function Sidebar() {
+function SidebarToggle({ expanded, onToggle }: { expanded: boolean; onToggle: () => void }) {
+    const label = expanded ? 'Collapse menu' : 'Expand menu';
     return (
-        <aside className="sidebar">
-            <div className="brand">
-                <span className="brand-mark">T</span>
-                <div>
-                    <div className="brand-name">{APP_NAME}</div>
-                    <div className="brand-sub">{APP_SUBTITLE}</div>
-                </div>
+        <button type="button" className="sidebar-toggle" onClick={onToggle} aria-expanded={expanded} aria-label={label} title={label}>
+            <span aria-hidden="true">{expanded ? '«' : '»'}</span>
+        </button>
+    );
+}
+
+function Sidebar() {
+    const { persona } = usePersona();
+    const { expanded, toggle } = useSidebarExpanded();
+    return (
+        <aside className={`sidebar${expanded ? ' expanded' : ''}`}>
+            <div className="brand" title={`${APP_NAME} ${APP_SUBTITLE}`}>
+                <span className="brand-mark" aria-hidden="true">T</span>
+                <div className="brand-text"><div className="brand-name">{APP_NAME}</div><div className="brand-sub">{APP_SUBTITLE}</div></div>
             </div>
-            <nav className="nav">
-                {NAV_GROUPS.map(group => <NavSection key={group.label} group={group} />)}
-            </nav>
+            <SidebarToggle expanded={expanded} onToggle={toggle} />
+            <nav className="nav">{filterNavGroups(NAV_GROUPS, persona).map(g => <NavSection key={g.label} group={g} />)}</nav>
         </aside>
     );
 }

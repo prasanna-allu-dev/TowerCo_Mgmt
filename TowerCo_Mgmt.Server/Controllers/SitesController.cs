@@ -5,7 +5,7 @@ namespace TowerCo_Mgmt.Server.Controllers;
 
 /// <summary>UC3 search and site view, UC1 site registration.</summary>
 // AUTH (out of scope for this demo): this controller must require authentication.
-// Intended: [Authorize] for reads; [Authorize(Policy = "Operations")] on Create (UC1 registers sites).
+// Intended: [Authorize] for reads; [Authorize(Policy = "Operations")] on Create, ChangeStatus and Rename (UC1).
 [ApiController]
 [Route(ApiRoutes.Sites)]
 public sealed class SitesController(ISiteQueryService queries, ISiteCommandService commands) : ControllerBase
@@ -24,4 +24,13 @@ public sealed class SitesController(ISiteQueryService queries, ISiteCommandServi
         var site = await commands.CreateAsync(request, ct);
         return CreatedAtAction(nameof(Get), new { id = site.Id }, site);
     }
+
+    /// <summary>Lifecycle move. Invalid move, activating without a tower, or decommissioning with tenants returns 409.</summary>
+    [HttpPatch(ApiRoutes.SiteStatus)]
+    public Task<SiteDetailDto> ChangeStatus(int id, ChangeSiteStatusRequest request, CancellationToken ct) =>
+        commands.ChangeStatusAsync(id, request, ct);
+
+    [HttpPatch(ApiRoutes.SiteName)]
+    public Task<SiteDetailDto> Rename(int id, RenameSiteRequest request, CancellationToken ct) =>
+        commands.RenameAsync(id, request, ct);
 }

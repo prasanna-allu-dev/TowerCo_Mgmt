@@ -1,5 +1,4 @@
 using TowerCo.Domain.Entities;
-using TowerCo.Domain.Enums;
 
 namespace TowerCo.Infrastructure.Persistence.Seed;
 
@@ -34,11 +33,6 @@ internal sealed class SeedData
             AddTenancyWithRadio(tower, tenancySeed);
         }
 
-        if (seed.Status == SiteStatus.Active)
-        {
-            InstallSharedPower(tower);
-        }
-
         return site;
     }
 
@@ -60,16 +54,7 @@ internal sealed class SeedData
         }
     }
 
-    /// <summary>Rooftops run on solar (no space for a generator); other towers on diesel. All get a battery bank.</summary>
-    private void InstallSharedPower(Tower tower)
-    {
-        var installedOn = DateOnly.FromDateTime(SeedCatalogue.SeededAtUtc);
-        var primaryPower = tower.TowerType == TowerType.Rooftop ? SeedCatalogue.SolarArray : SeedCatalogue.DieselGenerator;
-        Install(tower, primaryPower, installedOn, null, null);
-        Install(tower, SeedCatalogue.BatteryBank, installedOn, null, null);
-    }
-
-    private Equipment Install(Tower tower, string typeName, DateOnly installedOn, decimal? mountHeight, Tenancy? tenancy)
+    private Equipment Install(Tower tower, string typeName, DateOnly installedOn, decimal? mountHeight, Tenancy tenancy)
     {
         var serial = string.Format(SerialFormat, tower.Site.SiteCode, tower.Equipment.Count + 1);
         return tower.InstallEquipment(_equipmentTypes[typeName], serial, installedOn, mountHeight, tenancy);

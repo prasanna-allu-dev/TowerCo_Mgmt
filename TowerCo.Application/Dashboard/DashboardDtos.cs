@@ -17,7 +17,6 @@ public sealed record ExpiringTenancyDto(int TenancyId, int SiteId, string SiteCo
 public sealed record SellableTowerDto(int SiteId, string SiteCode, string SiteName, string CountryCode, int AvailableSlots);
 
 /// <summary>Declared in priority order: alerts are sorted most severe first.</summary>
-[JsonConverter(typeof(AlertSeverityJsonConverter))]
 public enum AlertSeverity
 {
     Critical,
@@ -26,10 +25,15 @@ public enum AlertSeverity
     Ok
 }
 
-/// <summary>Serialises severity in lower camel case ("critical") to match the client contract.</summary>
+/// <summary>
+/// Serialises severity in lower camel case ("critical") to match the client contract.
+/// Applied on the property, because a property converter wins over the global enum converter in Program.
+/// </summary>
 public sealed class AlertSeverityJsonConverter() : JsonStringEnumConverter<AlertSeverity>(JsonNamingPolicy.CamelCase);
 
-public sealed record DashboardAlertDto(string Id, AlertSeverity Severity, string Title, string Detail, int? SiteId);
+public sealed record DashboardAlertDto(
+    string Id,
+    [property: JsonConverter(typeof(AlertSeverityJsonConverter))] AlertSeverity Severity, string Title, string Detail, int? SiteId);
 
 public sealed record PortfolioDashboardDto(
     PortfolioKpisDto Kpis,

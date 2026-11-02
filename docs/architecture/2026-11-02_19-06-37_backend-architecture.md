@@ -134,7 +134,7 @@ erDiagram
     OPERATOR ||--o{ TENANCY : holds
     TOWER ||--o{ EQUIPMENT : carries
     EQUIPMENT_TYPE ||--o{ EQUIPMENT : classifies
-    TENANCY |o--o{ EQUIPMENT : "owns (null = TowerCo shared)"
+    TENANCY ||--o{ EQUIPMENT : "owns (required)"
     SITE ||--o{ WORK_ORDER : "raised against"
     SITE ||--o{ INSPECTION : "inspected by"
     SITE ||--o{ SENSOR_READING : "reports (by SiteCode)"
@@ -180,7 +180,7 @@ erDiagram
         int Id PK
         int TowerId FK
         int EquipmentTypeId FK
-        int TenancyId FK "nullable"
+        int TenancyId FK "required"
         string SerialNumber UK
         date InstalledOn
         decimal MountHeightMetres "nullable"
@@ -264,6 +264,7 @@ classDiagram
     Tower "1" *-- "*" Equipment
     Site ..> SiteLocation
     Tenancy ..> Money
+    Tenancy "1" o-- "*" Equipment : owns
     WorkOrder --> Site
 ```
 
@@ -280,7 +281,7 @@ classDiagram
 | `Operator` | Mobile network operator (fictional) | Name unique |
 | `Tenancy` | Lease of one slot by an operator | Active when `EndDate` is null or on or after the given date |
 | `EquipmentType` | Configurable catalogue | New types are data, not code |
-| `Equipment` | Physical asset on a tower | `TenancyId` set means tenant-owned; null means TowerCo shared infrastructure |
+| `Equipment` | Physical asset on a tower | Always tenant owned: `TenancyId` is required and must point to a tenancy on the same tower. There is no TowerCo shared equipment |
 | `WorkOrder` | Field job raised against a site | Status workflow enforced in the entity |
 | `Inspection` | Structural inspection record | Feeds tower health |
 | `SensorReading` | One normalised telemetry measurement | Keyed by `SiteCode`; feeds tower health |
@@ -314,6 +315,7 @@ Every capacity method takes an `asOf` date. Services pass today's date from an i
 | 10 | Work order moves only along allowed transitions | `WorkOrder.ChangeStatus` | `InvalidWorkOrderTransitionException` | 409 |
 | 11 | `Assigned` status needs an assignee | `WorkOrder.ChangeStatus` | `WorkOrderAssigneeRequiredException` | 400 |
 | 12 | Work order title at least 5 characters | `WorkOrder` constructor | `InvalidWorkOrderTitleException` | 400 |
+| 13 | Every equipment item belongs to a tenancy on the same tower (no TowerCo shared equipment) | `Tower.InstallEquipment` | `InvalidEquipmentOwnerException` | 409 |
 
 Request-shape validation (country code pattern, site code pattern `^[A-Z]{2}-[A-Z]{3}-\d{4}$`, tower height 5 to 120 m, 1 to 6 tenant slots, currency pattern) uses data annotations with limits from `TowerCo.Application/Constants/ValidationRules.cs`, and returns 400 through `[ApiController]`.
 
@@ -374,7 +376,7 @@ Base path `/api`. JSON with string enums. Interactive reference at `/scalar` in 
 | GET | `/towers` | Tower configuration list | 200 `TowerConfigurationDto[]` | |
 | GET | `/tenancies` | Tenancy register (filters: search, operatorId, state, country) | 200 `TenantRecordDto[]` | 400 |
 | POST | `/towers/{towerId}/tenancies` | UC2 add tenant | 201 `TenancyDto` | 400, 404, 409 |
-| GET | `/equipment` | Equipment register (filters: search, category, owner, status, country, siteId) | 200 `EquipmentItemDto[]` | 400 |
+| GET | `/equipment` | Equipment register (filters: search, category, status, country, siteId; search also matches the owning operator) | 200 `EquipmentItemDto[]` | 400 |
 | GET | `/equipment-types` | Catalogue with item counts | 200 `EquipmentTypeSummaryDto[]` | |
 | GET | `/dashboard` | UC4 portfolio overview | 200 `PortfolioDashboardDto` | |
 | GET | `/work-orders?search=&status=&priority=&country=` | Work order list | 200 `WorkOrderDto[]` | 400 |
@@ -422,6 +424,7 @@ classDiagram
     BusinessRuleException <|-- DuplicateSiteCodeException
     BusinessRuleException <|-- TowerAlreadyExistsException
     BusinessRuleException <|-- InvalidWorkOrderTransitionException
+    BusinessRuleException <|-- InvalidEquipmentOwnerException
     <<abstract>> DomainException
     <<abstract>> BusinessRuleException
 ```
@@ -462,7 +465,7 @@ A new rule only needs a new exception class deriving from the right base; no han
 | Operators | 9 fictional MNOs |
 | Equipment types | 8 (5G AAU, 4G RRU, Microwave Dish, Diesel Generator, Battery Bank, Solar Array, Air Conditioner, Security Camera) |
 | Tenancies | Mix of full, partial and empty towers |
-| Equipment | Per tenancy: radio plus microwave dish; per active tower: shared power plus battery |
+| Equipment | Per tenancy: radio (5G AAU or 4G RRU) plus microwave dish, all tenant owned; items of ended tenancies marked Removed |
 | Work orders, inspections, sensor readings | Planted mix of healthy, warning and critical sites |
 
 ## 11. Configuration

@@ -1,4 +1,3 @@
-using TowerCo.Application.Constants;
 using TowerCo.Domain.Entities;
 
 namespace TowerCo.Application.Sites;
@@ -33,6 +32,6 @@ public static class SiteMapper
 
     private static EquipmentDto ToEquipment(Equipment equipment) => new(
         equipment.Id, equipment.EquipmentType.Name, equipment.EquipmentType.Category,
-        equipment.Tenancy?.Operator.Name ?? DisplayLabels.SharedEquipmentOwner, equipment.Tenancy is null,
+        equipment.TenancyId, equipment.Tenancy.Operator.Name,
         equipment.SerialNumber, equipment.InstalledOn, equipment.MountHeightMetres, equipment.Status);
 }

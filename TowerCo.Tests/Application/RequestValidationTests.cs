@@ -18,7 +18,6 @@ public class RequestValidationTests
         new TenantFilter { State = "pending" },
         new TenantFilter { OperatorId = 0 },
         new TenantFilter { Country = "IND" },
-        new EquipmentFilter { Owner = "landlord" },
         new EquipmentFilter { SiteId = 0 },
         new WorkOrderFilter { Search = new string('x', 101) },
         new SiteFilter { Country = "1" },
@@ -37,6 +36,6 @@ public class RequestValidationTests
     public void ValidFilters_PassValidation()
     {
         Assert.True(IsValid(new TenantFilter { State = "active", OperatorId = 1, Country = "in" }));
-        Assert.True(IsValid(new EquipmentFilter { Owner = "shared", SiteId = 1, Country = "KE" }));
+        Assert.True(IsValid(new EquipmentFilter { SiteId = 1, Country = "KE" }));
     }
 }

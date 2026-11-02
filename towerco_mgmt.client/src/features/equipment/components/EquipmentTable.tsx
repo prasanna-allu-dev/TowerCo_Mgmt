@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import { SeverityPill } from '@/shared/components';
-import { SHARED_OWNER_LABEL } from '@/shared/constants/domain';
+import { Pagination, SeverityPill } from '@/shared/components';
+import { usePagination } from '@/shared/hooks/usePagination';
 import type { EquipmentItem, EquipmentStatus } from '@/features/equipment/types';
 import type { Severity } from '@/shared/types/domain';
 import { sitePath } from '@/shared/constants/routes';
@@ -18,7 +18,7 @@ function EquipmentRow({ item, showSite }: { item: EquipmentItem; showSite: boole
             {showSite && <td><Link to={sitePath(item.siteId)} className="mono">{item.siteCode}</Link></td>}
             <td>{item.typeName}</td>
             <td>{item.category}</td>
-            <td>{item.ownerName ?? <span className="muted">{SHARED_OWNER_LABEL}</span>}</td>
+            <td>{item.ownerName}</td>
             <td className="mono">{item.serialNumber}</td>
             <td className="mono">{item.installedOn}</td>
             <td>{item.mountHeightMetres === null ? '-' : `${item.mountHeightMetres} m`}</td>
@@ -28,7 +28,9 @@ function EquipmentRow({ item, showSite }: { item: EquipmentItem; showSite: boole
 }
 
 function EquipmentTable({ items, showSite = false }: EquipmentTableProps) {
+    const paging = usePagination(items);
     return (
+        <>
         <table className="table">
             <thead>
                 <tr>
@@ -36,8 +38,10 @@ function EquipmentTable({ items, showSite = false }: EquipmentTableProps) {
                     <th>Type</th><th>Category</th><th>Owner</th><th>Serial</th><th>Installed</th><th>Mount height</th><th>Status</th>
                 </tr>
             </thead>
-            <tbody>{items.map(item => <EquipmentRow key={item.id} item={item} showSite={showSite} />)}</tbody>
+            <tbody>{paging.pageRows.map(item => <EquipmentRow key={item.id} item={item} showSite={showSite} />)}</tbody>
         </table>
+        <Pagination {...paging} />
+        </>
     );
 }
 

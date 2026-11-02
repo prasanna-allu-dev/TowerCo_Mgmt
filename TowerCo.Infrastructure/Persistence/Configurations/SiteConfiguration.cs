@@ -16,6 +16,8 @@ internal sealed class SiteConfiguration : IEntityTypeConfiguration<Site>
         {
             location.Property(l => l.CountryCode).HasMaxLength(ColumnLengths.CountryCode).IsRequired();
             location.Property(l => l.City).HasMaxLength(ColumnLengths.Name).IsRequired();
+            location.Property(l => l.Latitude);
+            location.Property(l => l.Longitude);
         });
         builder.HasOne(s => s.Tower).WithOne(t => t.Site)
             .HasForeignKey<Tower>(t => t.SiteId).OnDelete(DeleteBehavior.Cascade);

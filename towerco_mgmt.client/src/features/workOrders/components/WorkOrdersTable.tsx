@@ -2,16 +2,20 @@ import { useNavigate } from 'react-router-dom';
 import { workOrderPath } from '@/shared/constants/routes';
 import type { WorkOrder } from '@/features/workOrders/types';
 import { DuePill, PriorityPill, WorkOrderStatusPill } from './WorkOrderPills';
+import { Pagination } from '@/shared/components';
+import { usePagination } from '@/shared/hooks/usePagination';
 
 function WorkOrdersTable({ workOrders }: { workOrders: WorkOrder[] }) {
     const navigate = useNavigate();
+    const paging = usePagination(workOrders);
     return (
+        <>
         <table className="table">
             <thead>
                 <tr><th>Code</th><th>Title</th><th>Site</th><th>Priority</th><th>Status</th><th>Assignee</th><th>Due</th></tr>
             </thead>
             <tbody>
-                {workOrders.map(wo => (
+                {paging.pageRows.map(wo => (
                     <tr key={wo.id} className="clickable" onClick={() => navigate(workOrderPath(wo.id))}>
                         <td className="mono">{wo.code}</td>
                         <td>{wo.title}<div className="muted">{wo.category}</div></td>
@@ -24,6 +28,8 @@ function WorkOrdersTable({ workOrders }: { workOrders: WorkOrder[] }) {
                 ))}
             </tbody>
         </table>
+        <Pagination {...paging} />
+        </>
     );
 }
 

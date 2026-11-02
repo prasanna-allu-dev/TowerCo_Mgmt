@@ -12,4 +12,5 @@ public interface ITowerRepository
 
     /// <summary>Tracked tower so changes are saved by IUnitOfWork.</summary>
     Task<Tower?> GetForUpdateAsync(int towerId, CancellationToken cancellationToken);
+    Task<Tower?> GetForUpdateBySiteIdAsync(int siteId, CancellationToken cancellationToken);
 }

@@ -34,7 +34,7 @@ All data in this repository is **fictional** and exists for demonstration only.
 
 ## Overview
 
-TowerCo operates telecom tower sites across several countries. Each **site** carries one **tower**; each tower has a fixed number of **tenant slots** that are leased to **operators** through **tenancies**. Towers also carry **equipment**, either owned by a tenant (antennas, radios, dishes) or shared TowerCo infrastructure (generators, batteries, solar).
+TowerCo operates telecom tower sites across several countries. Each **site** carries one **tower**; each tower has a fixed number of **tenant slots** that are leased to **operators** through **tenancies**. Towers also carry **equipment** (antennas, radios, dishes, power and cooling kit), and every item is owned by the tenant whose tenancy installed it. TowerCo does not own shared equipment.
 
 The system answers four everyday questions:
 
@@ -145,37 +145,133 @@ The server uses the ASP.NET Core SPA proxy, so starting the API also starts the 
 dotnet run --project TowerCo_Mgmt.Server --launch-profile https
 ```
 
-| URL | What |
-|-----|------|
-| `https://localhost:57138` | React client |
-| `https://localhost:7292/scalar` | Interactive API reference (Development only) |
-| `https://localhost:7292/openapi/v1.json` | OpenAPI document |
+Open `https://localhost:57138`. Details of each option, ports and the database follow.
 
-To run the client on its own (for example against the mock API):
+#### First-time setup (clean clone)
 
 ```bash
-cd towerco_mgmt.client
-npm install
-npm run dev
+dotnet dev-certs https --trust
 ```
+
+```bash
+cd towerco_mgmt.client && npm install
+```
+
+```bash
+dotnet restore TowerCo_Mgmt.slnx
+```
+
+Then make sure `towerco_mgmt.client/.env` contains `VITE_USE_MOCK_API=false` so the UI calls the real API (see [Client variables](#client-variables-towerco_mgmtclientenv)).
+
+#### Option A: one command (API and client together)
+
+The `SpaProxy` settings in `TowerCo_Mgmt.Server.csproj` (`SpaRoot`, `SpaProxyLaunchCommand=npm run dev`, `SpaProxyServerUrl`) make the API start the Vite dev server for you. Visual Studio users can press F5 with the `https` profile.
+
+#### Option B: run API and client separately
+
+Terminal 1 (API):
+
+```bash
+dotnet run --project TowerCo_Mgmt.Server --launch-profile https
+```
+
+Terminal 2 (client):
+
+```bash
+cd towerco_mgmt.client && npm run dev
+```
+
+The Vite dev server proxies every `/api` call to the API (see `server.proxy` in `vite.config.ts`), so no CORS setup is needed.
+
+#### Option C: client only, on the mock API
+
+Set `VITE_USE_MOCK_API=true` in `towerco_mgmt.client/.env`, then run `npm run dev`. No backend or database is needed; data lives in memory and resets on refresh.
+
+#### Option D: sensor ingestion Functions (optional)
+
+```bash
+cd TowerCo.Ingestion && func start
+```
+
+Needs Azure Functions Core Tools v4 and a local storage emulator (Azurite) for `AzureWebJobsStorage`. The IoT Hub trigger is disabled locally through `AzureWebJobs.IngestFromIoTHub.Disabled`; use the HTTP endpoint `POST /api/telemetry` instead. Readings are validated and logged only; they are not yet written to the database.
+
+#### URLs and ports
+
+| URL | What | Defined in |
+|-----|------|------------|
+| `https://localhost:57138` | React client | `vite.config.ts` (`DEV_SERVER_PORT`), `SpaProxyServerUrl` in server `.csproj` |
+| `https://localhost:7292` | API (HTTPS) | `TowerCo_Mgmt.Server/Properties/launchSettings.json`, `https` profile |
+| `http://localhost:5255` | API (HTTP) | same, `http` and `https` profiles |
+| `https://localhost:7292/scalar` | Interactive API reference (Development only) | `Program.cs` |
+| `https://localhost:7292/openapi/v1.json` | OpenAPI document | `Program.cs` |
+
+If you change an API port, also update the proxy target (see `ASPNETCORE_HTTPS_PORT` below) so the client still reaches it.
 
 ### Database
 
-- On first start the API creates `TowerCo_Mgmt.Server/towerco.db` and seeds a fictional portfolio: 12 sites across India, South Africa, Kenya and Nigeria, 9 operators and 8 equipment types, plus tenancies, equipment, work orders, inspections and sensor readings.
-- The schema is created with `EnsureCreated` (no migrations yet). **After a model change, delete `towerco.db`** and restart to re-seed.
+| Item | Value |
+|------|-------|
+| Engine | SQLite (single file, no server to install) |
+| File location | `TowerCo_Mgmt.Server/towerco.db` when started with `dotnet run` from the repository root or from Visual Studio. The path in the connection string is relative to the API's working directory (the content root) |
+| Connection string | `ConnectionStrings:TowerCoDb` in `TowerCo_Mgmt.Server/appsettings.json`, default `Data Source=towerco.db` |
+| Created by | API startup: schema via EF Core `EnsureCreated`, then `DatabaseSeeder` fills fictional data if the database is empty |
+| Seed content | 12 sites across India, South Africa, Kenya and Nigeria, 9 operators, 8 equipment types, plus tenancies, equipment, work orders, inspections and 30 days of simulated sensor readings |
+| Version control | Ignored by `.gitignore` (`*.db`); never commit it |
+| Tests | Use SQLite in-memory databases, never the file above |
+
+Common tasks:
+
+- **Reset to fresh seed data**: stop the API, delete `TowerCo_Mgmt.Server/towerco.db`, start the API again.
+- **After a model or schema change**: same as above. There are no EF migrations yet, so an existing file will not pick up new tables or columns.
+- **Use a different file or folder**: change the connection string, for example `Data Source=C:/data/towerco.db`, or override it without editing files with the environment variable `ConnectionStrings__TowerCoDb`.
+- **Inspect the data**: open the file with any SQLite browser (for example DB Browser for SQLite or the VS Code SQLite extension). Stop the API first if you plan to edit rows.
+- **Missing connection string**: the API fails at startup with `MissingConfigurationException` naming `ConnectionStrings:TowerCoDb`.
 
 ## Configuration
 
-| Setting | Location | Purpose |
-|---------|----------|---------|
-| `ConnectionStrings:TowerCoDb` | `TowerCo_Mgmt.Server/appsettings.json` | SQLite file path |
-| `Dashboard` | same | Renewal window and critical days for dashboard alerts |
-| `Health` | same | Telemetry window and inspection age thresholds |
-| `AlarmThresholds` | same, and `TowerCo.Ingestion/local.settings.json` | Warning and critical limits per sensor type |
-| `VITE_USE_MOCK_API` | `towerco_mgmt.client/.env` | `true` uses the in-memory mock, `false` calls the real API |
-| `VITE_MOCK_LATENCY_MS` | `towerco_mgmt.client/.env` | Optional artificial delay for the mock |
+ASP.NET Core reads `appsettings.json`, then `appsettings.{Environment}.json`, then environment variables. Any key can be overridden with an environment variable by replacing `:` with `__`, for example `Health__TelemetryWindowDays=14`.
 
-Threshold values in configuration are fictional starting values for discussion, not taken from an industry standard. No secrets are stored in this repository.
+### Server variables (`TowerCo_Mgmt.Server/appsettings.json`)
+
+| Key | Default | What it changes |
+|-----|---------|-----------------|
+| `ConnectionStrings:TowerCoDb` | `Data Source=towerco.db` | SQLite file path (see [Database](#database)) |
+| `Dashboard:RenewalWindowDays` | `90` | Tenancies ending within this many days appear as renewals |
+| `Dashboard:RenewalCriticalDays` | `30` | Renewals within this many days are flagged critical |
+| `Health:TelemetryWindowDays` | `30` | Days of sensor readings used for tower health and sparklines |
+| `Health:InspectionWarningMonths` | `12` | Inspection older than this is a warning |
+| `Health:InspectionCriticalMonths` | `24` | Inspection older than this is critical |
+| `AlarmThresholds:<SensorType>` | see file | `Warning`, `Critical` and `Direction` (`LowIsBad` or `HighIsBad`) for `BatteryVoltage`, `ShelterTemperature`, `GeneratorFuelLevel`, `TowerTilt` |
+| `Logging:LogLevel` | `Information` | Log verbosity |
+
+### Launch and environment variables (`launchSettings.json`)
+
+| Variable | Default | What it changes |
+|----------|---------|-----------------|
+| `ASPNETCORE_ENVIRONMENT` | `Development` | Enables Scalar and OpenAPI; selects `appsettings.Development.json` |
+| `applicationUrl` | `https://localhost:7292;http://localhost:5255` | API ports |
+| `ASPNETCORE_HOSTINGSTARTUPASSEMBLIES` | `Microsoft.AspNetCore.SpaProxy` | Starts the Vite dev server with the API; remove to run API only |
+
+### Client variables (`towerco_mgmt.client/.env`)
+
+| Variable | Default | What it changes |
+|----------|---------|-----------------|
+| `VITE_USE_MOCK_API` | unset (real API) | `true` uses in-memory mock data; any other value calls the real API. Set `false` explicitly for demos |
+| `VITE_MOCK_LATENCY_MS` | `0` | Artificial delay for mock calls, to show loading states |
+| `DEV_SERVER_PORT` | `57138` | Vite dev server port (shell environment variable). Also update `SpaProxyServerUrl` if changed |
+| `ASPNETCORE_HTTPS_PORT` / `ASPNETCORE_URLS` | `https://localhost:7292` | Where Vite proxies `/api` (shell environment variable) |
+
+Restart `npm run dev` after editing `.env`; Vite reads it only at start-up.
+
+### Ingestion variables (`TowerCo.Ingestion/local.settings.json`)
+
+| Key | What it changes |
+|-----|-----------------|
+| `AzureWebJobsStorage` | Functions host storage (standard Functions setting; Azurite locally) |
+| `AzureWebJobs.IngestFromIoTHub.Disabled` | `true` locally to switch off the IoT Hub trigger |
+| `AlarmThresholds:*` | Same shape as the server section; keep both in step |
+
+Threshold values in configuration are fictional starting values for discussion, not taken from an industry standard. No secrets are stored in this repository: never put a real IoT Hub or storage connection string in `local.settings.json` or `.env`; use user secrets or environment variables instead.
 
 ## Testing
 

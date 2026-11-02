@@ -16,6 +16,11 @@ export const API_ENDPOINTS = {
     workOrderStatus: (id: number) => `/work-orders/${id}/status`,
     health: '/health/sites',
     siteHealth: (siteId: number) => `/health/sites/${siteId}`,
+    siteStatus: (siteId: number) => `/sites/${siteId}/status`,
+    towerCapacity: (towerId: number) => `/towers/${towerId}/capacity`,
+    tenancyEnd: (towerId: number, tenancyId: number) => `/towers/${towerId}/tenancies/${tenancyId}/end`,
+    tenancyRenewal: (towerId: number, tenancyId: number) => `/towers/${towerId}/tenancies/${tenancyId}/renewal`,
+    tenancyRentReview: (towerId: number, tenancyId: number) => `/towers/${towerId}/tenancies/${tenancyId}/rent-review`,
 } as const;
 
 export const API_ERROR_FALLBACK = 'Unable to reach the server. Please try again.';

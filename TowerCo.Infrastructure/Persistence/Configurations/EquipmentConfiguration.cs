@@ -15,6 +15,6 @@ internal sealed class EquipmentConfiguration : IEntityTypeConfiguration<Equipmen
         builder.HasOne(e => e.EquipmentType).WithMany()
             .HasForeignKey(e => e.EquipmentTypeId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(e => e.Tenancy).WithMany()
-            .HasForeignKey(e => e.TenancyId).OnDelete(DeleteBehavior.Restrict);
+            .HasForeignKey(e => e.TenancyId).IsRequired().OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -18,4 +18,10 @@ public static class ApiRoutes
     public const string Equipment = "equipment";
     public const string EquipmentTypes = "equipment-types";
     public const string WorkOrderStatus = "{id:int}/status";
+    public const string SiteStatus = "{id:int}/status";
+    public const string SiteName = "{id:int}/name";
+    public const string TowerCapacity = "{towerId:int}/capacity";
+    public const string TenancyEnd = "towers/{towerId:int}/tenancies/{tenancyId:int}/end";
+    public const string TenancyRenewal = "towers/{towerId:int}/tenancies/{tenancyId:int}/renewal";
+    public const string TenancyRentReview = "towers/{towerId:int}/tenancies/{tenancyId:int}/rent-review";
 }

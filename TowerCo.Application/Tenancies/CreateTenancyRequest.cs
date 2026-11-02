@@ -11,6 +11,9 @@ public sealed class CreateTenancyRequest
 
     public required DateOnly StartDate { get; init; }
 
+    /// <summary>Optional end of a fixed-term lease; omit for open ended.</summary>
+    public DateOnly? EndDate { get; init; }
+
     [Range(ValidationRules.MinMonthlyRent, double.MaxValue)]
     public required decimal MonthlyRent { get; init; }
 

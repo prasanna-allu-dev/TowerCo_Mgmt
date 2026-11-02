@@ -1,11 +1,10 @@
-import { OWNER_TENANT } from '@/shared/constants/domain';
 import type { EquipmentFilter, EquipmentItem, EquipmentStatus, EquipmentType, EquipmentTypeSummary } from '@/features/equipment/types';
 import type { EquipmentApi } from '@/features/equipment/api';
 import { delay, isActive } from './mockApi';
 import { MOCK_OPERATORS, MOCK_SITES, MOCK_TENANCIES, MOCK_TOWERS } from './mockData';
 import type { MockTower } from './mockData';
 
-// Fictional demo data. Mirrors the equipment seed: two items per tenancy, shared power kit on active towers.
+// Fictional demo data. Mirrors the equipment seed: two tenant-owned items per tenancy, no TowerCo-owned kit.
 export const MOCK_EQUIPMENT_TYPES: EquipmentType[] = [
     { id: 1, name: '5G Active Antenna (AAU)', category: 'Radio' },
     { id: 2, name: '4G Remote Radio Unit', category: 'Radio' },
@@ -20,11 +19,6 @@ export const MOCK_EQUIPMENT_TYPES: EquipmentType[] = [
 const TYPE_5G = 1;
 const TYPE_4G = 2;
 const TYPE_DISH = 3;
-const TYPE_GENERATOR = 4;
-const TYPE_BATTERY = 5;
-const TYPE_SOLAR = 6;
-const ROOFTOP = 'Rooftop';
-const SHARED_INSTALLED_ON = '2022-01-15';
 const MOUNT_STEP_METRES = 4;
 const DISH_DROP_METRES = 2;
 const SERIAL_PREFIX = 'EQ';
@@ -33,7 +27,7 @@ const SERIAL_DIGITS = 4;
 interface Draft {
     towerId: number;
     typeId: number;
-    tenancyId: number | null;
+    tenancyId: number;
     installedOn: string;
     mountHeightMetres: number | null;
     status: EquipmentStatus;
@@ -57,27 +51,18 @@ function tenantDrafts(tower: MockTower): Draft[] {
     });
 }
 
-function sharedDrafts(tower: MockTower): Draft[] {
-    const site = MOCK_SITES.find(s => s.id === tower.siteId)!;
-    if (site.status !== 'Active') return [];
-    const power = tower.towerType === ROOFTOP ? TYPE_SOLAR : TYPE_GENERATOR;
-    return [power, TYPE_BATTERY].map(typeId => ({
-        towerId: tower.id, typeId, tenancyId: null, installedOn: SHARED_INSTALLED_ON, mountHeightMetres: null, status: 'Installed' as const,
-    }));
-}
-
 const serialOf = (id: number) => `${SERIAL_PREFIX}-${String(id).padStart(SERIAL_DIGITS, '0')}`;
 
 export const MOCK_EQUIPMENT: MockEquipment[] = MOCK_TOWERS
-    .flatMap(tower => [...tenantDrafts(tower), ...sharedDrafts(tower)])
+    .flatMap(tenantDrafts)
     .map((draft, index) => ({ ...draft, id: index + 1, serialNumber: serialOf(index + 1) }));
 
 function toItem(row: MockEquipment): EquipmentItem {
     const tower = MOCK_TOWERS.find(t => t.id === row.towerId)!;
     const site = MOCK_SITES.find(s => s.id === tower.siteId)!;
     const type = MOCK_EQUIPMENT_TYPES.find(t => t.id === row.typeId)!;
-    const tenancy = MOCK_TENANCIES.find(t => t.id === row.tenancyId);
-    const ownerName = tenancy ? MOCK_OPERATORS.find(o => o.id === tenancy.operatorId)!.name : null;
+    const tenancy = MOCK_TENANCIES.find(t => t.id === row.tenancyId)!;
+    const ownerName = MOCK_OPERATORS.find(o => o.id === tenancy.operatorId)!.name;
     return {
         ...row, siteId: site.id, siteCode: site.siteCode, siteName: site.name, countryCode: site.countryCode,
         typeName: type.name, category: type.category, ownerName,
@@ -86,13 +71,12 @@ function toItem(row: MockEquipment): EquipmentItem {
 
 function textMatches(item: EquipmentItem, search?: string): boolean {
     const text = search?.toLowerCase();
-    const fields = [item.serialNumber, item.typeName, item.siteCode, item.siteName, item.ownerName ?? ''];
+    const fields = [item.serialNumber, item.typeName, item.siteCode, item.siteName, item.ownerName];
     return !text || fields.some(v => v.toLowerCase().includes(text));
 }
 
 function matches(item: EquipmentItem, filter: EquipmentFilter): boolean {
-    const ownerHit = !filter.owner || (filter.owner === OWNER_TENANT) === (item.tenancyId !== null);
-    return textMatches(item, filter.search) && ownerHit
+    return textMatches(item, filter.search)
         && (!filter.category || item.category === filter.category)
         && (!filter.status || item.status === filter.status)
         && (!filter.country || item.countryCode === filter.country)

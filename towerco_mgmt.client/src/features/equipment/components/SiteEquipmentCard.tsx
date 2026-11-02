@@ -1,5 +1,5 @@
+import { useMemo } from 'react';
 import { Card, StateMessage } from '@/shared/components';
-import { SHARED_OWNER_LABEL } from '@/shared/constants/domain';
 import type { EquipmentItem } from '@/features/equipment/types';
 import EquipmentTable from './EquipmentTable';
 
@@ -7,19 +7,24 @@ function Group({ title, items }: { title: string; items: EquipmentItem[] }) {
     return (
         <>
             <h3>{title} ({items.length})</h3>
-            <StateMessage empty={!items.length} emptyText="None recorded." />
-            {!!items.length && <EquipmentTable items={items} />}
+            <EquipmentTable items={items} />
         </>
     );
 }
 
+/** Every item belongs to a tenancy, so the site's equipment is grouped by owning operator. */
+function groupByOwner(items: EquipmentItem[]): [string, EquipmentItem[]][] {
+    const groups = new Map<string, EquipmentItem[]>();
+    items.forEach(item => groups.set(item.ownerName, [...(groups.get(item.ownerName) ?? []), item]));
+    return [...groups.entries()];
+}
+
 function SiteEquipmentCard({ items }: { items: EquipmentItem[] }) {
-    const tenantOwned = items.filter(i => i.tenancyId !== null);
-    const shared = items.filter(i => i.tenancyId === null);
+    const byOwner = useMemo(() => groupByOwner(items), [items]);
     return (
         <Card title="Equipment">
-            <Group title="Tenant-owned" items={tenantOwned} />
-            <Group title={SHARED_OWNER_LABEL} items={shared} />
+            <StateMessage empty={!items.length} emptyText="No equipment recorded." />
+            {byOwner.map(([owner, ownerItems]) => <Group key={owner} title={owner} items={ownerItems} />)}
         </Card>
     );
 }

@@ -23,8 +23,8 @@ export interface EquipmentItem {
     typeId: number;
     typeName: string;
     category: EquipmentCategory;
-    tenancyId: number | null;
-    ownerName: string | null;
+    tenancyId: number;
+    ownerName: string;
     serialNumber: string;
     installedOn: string;
     mountHeightMetres: number | null;
@@ -34,7 +34,6 @@ export interface EquipmentItem {
 export interface EquipmentFilter {
     search?: string;
     category?: string;
-    owner?: string;
     status?: string;
     country?: string;
     siteId?: number;

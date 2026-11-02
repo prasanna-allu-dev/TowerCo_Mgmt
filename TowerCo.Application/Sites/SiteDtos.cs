@@ -13,7 +13,7 @@ public sealed record TenancyDto(
     int Id, int OperatorId, string OperatorName, DateOnly StartDate, DateOnly? EndDate, decimal MonthlyRent, string Currency);
 
 public sealed record EquipmentDto(
-    int Id, string TypeName, EquipmentCategory Category, string Owner, bool IsShared,
+    int Id, string TypeName, EquipmentCategory Category, int TenancyId, string Owner,
     string SerialNumber, DateOnly InstalledOn, decimal? MountHeightMetres, EquipmentStatus Status);
 
 /// <summary>Everything about a site: summary fields plus location, tower, tenancies and equipment.</summary>

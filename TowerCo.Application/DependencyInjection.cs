@@ -23,6 +23,7 @@ public static class DependencyInjection
         services.AddScoped<ITenancyService, TenancyService>();
         services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<ISiteCommandService, SiteCommandService>();
+        services.AddScoped<ITowerCommandService, TowerCommandService>();
         services.AddScoped<ITenantQueryService, TenantQueryService>();
         services.AddScoped<IEquipmentQueryService, EquipmentQueryService>();
         services.AddScoped<IWorkOrderService, WorkOrderService>();

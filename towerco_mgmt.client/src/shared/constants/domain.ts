@@ -10,14 +10,6 @@ export const COUNTRIES = [
 export const EQUIPMENT_CATEGORIES = ['Radio', 'Transmission', 'Power', 'Cooling', 'Security'] as const;
 export const EQUIPMENT_STATUSES = ['Planned', 'Installed', 'Removed'] as const;
 
-export const OWNER_TENANT = 'tenant';
-export const OWNER_SHARED = 'shared';
-export const SHARED_OWNER_LABEL = 'TowerCo shared';
-export const OWNER_FILTERS = [
-    { value: OWNER_TENANT, label: 'Tenant-owned' },
-    { value: OWNER_SHARED, label: SHARED_OWNER_LABEL },
-] as const;
-
 export const TENANCY_ACTIVE = 'active';
 export const TENANCY_ENDED = 'ended';
 export const TENANCY_STATES = [

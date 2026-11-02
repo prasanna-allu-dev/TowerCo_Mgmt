@@ -1,7 +1,8 @@
+import type { ReactNode } from 'react';
 import { CapacityBar, Card } from '@/shared/components';
 import type { SiteDetail } from '@/features/sites/types';
 
-function TowerCapacityCard({ site }: { site: SiteDetail }) {
+function TowerCapacityCard({ site, children }: { site: SiteDetail; children?: ReactNode }) {
     const { tower, capacity } = site;
     return (
         <Card title="Tower and capacity">
@@ -12,6 +13,7 @@ function TowerCapacityCard({ site }: { site: SiteDetail }) {
             </dl>
             <CapacityBar capacity={capacity} />
             {!capacity.hasCapacity && <p className="muted">No capacity for more tenants.</p>}
+            {children}
         </Card>
     );
 }

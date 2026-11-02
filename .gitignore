@@ -1,23 +1,64 @@
-# Build output
-bin/
-obj/
-dist/
+# ---------------------------------------------------------------
+# TowerCo Tower Management System
+# ---------------------------------------------------------------
+
+# .NET build output
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+*.nupkg
+*.snupkg
+
+# Visual Studio and IDE state
+.vs/
+.vscode/*
+!.vscode/launch.json
+.idea/
+*.user
+*.suo
+*.userprefs
+*.rsuser
+
+# Test results and coverage
 TestResults/
 coverage/
+*.coverage
+*.coveragexml
+coverage*.json
+coverage*.xml
 
-# Dependencies
-node_modules/
-
-# IDE and tooling
-.vs/
-.vscode/
-.idea/
-.playwright-mcp/
-*.user
-
-# Local data and env
+# Local SQLite database (created and seeded on first run)
 *.db
 *.db-shm
 *.db-wal
+# Seeded demo database is published so the repo runs with data out of the box
+!TowerCo_Mgmt.Server/towerco.db
+
+# Local settings and environment files (may hold machine or secret values)
+local.settings.json
+.env
+.env.*
+!.env.example
+appsettings.*.local.json
 *.local
-.env.local
+
+# Certificates and keys
+*.pfx
+*.pem
+*.key
+
+# Node and Vite client
+node_modules/
+dist/
+*.tsbuildinfo
+npm-debug.log*
+yarn-error.log*
+
+# Tooling scratch output
+.playwright-mcp/
+.harness_check/
+
+# OS files
+.DS_Store
+Thumbs.db

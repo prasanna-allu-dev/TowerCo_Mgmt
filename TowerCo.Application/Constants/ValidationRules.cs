@@ -19,5 +19,4 @@ public static class ValidationRules
     public const int MaxTenantsPerTower = 6;
     public const int MinId = 1;
     public const string TenancyStatePattern = "^(" + FilterValues.TenancyActive + "|" + FilterValues.TenancyEnded + ")$";
-    public const string OwnerPattern = "^(" + FilterValues.OwnerTenant + "|" + FilterValues.OwnerShared + ")$";
 }

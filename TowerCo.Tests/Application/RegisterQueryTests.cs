@@ -46,15 +46,15 @@ public class RegisterQueryTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Equipment_OwnerFilter_SplitsTenantAndShared()
+    public async Task Equipment_EveryItem_HasTenantOwnerFoundBySearch()
     {
         var all = await Equipment(new EquipmentFilter());
-        var tenant = await Equipment(new EquipmentFilter { Owner = FilterValues.OwnerTenant });
-        var shared = await Equipment(new EquipmentFilter { Owner = FilterValues.OwnerShared });
+        var first = all[0];
 
-        Assert.All(tenant, e => Assert.NotNull(e.TenancyId));
-        Assert.All(shared, e => Assert.Null(e.OwnerName));
-        Assert.Equal(all.Count, tenant.Count + shared.Count);
+        var byOwner = await Equipment(new EquipmentFilter { Search = first.OwnerName });
+
+        Assert.All(all, e => Assert.False(string.IsNullOrWhiteSpace(e.OwnerName)));
+        Assert.Contains(byOwner, e => e.Id == first.Id);
     }
 
     [Fact]

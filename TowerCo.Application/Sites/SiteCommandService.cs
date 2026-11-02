@@ -10,11 +10,13 @@ namespace TowerCo.Application.Sites;
 public interface ISiteCommandService
 {
     Task<SiteDetailDto> CreateAsync(CreateSiteRequest request, CancellationToken cancellationToken);
+    Task<SiteDetailDto> ChangeStatusAsync(int siteId, ChangeSiteStatusRequest request, CancellationToken cancellationToken);
+    Task<SiteDetailDto> RenameAsync(int siteId, RenameSiteRequest request, CancellationToken cancellationToken);
 }
 
-/// <summary>UC1: registers a site with its tower. Duplicate site codes are rejected (409).</summary>
-internal sealed class SiteCommandService(ISiteRepository sites, IUnitOfWork unitOfWork, TimeProvider timeProvider)
-    : ISiteCommandService
+/// <summary>UC1: registers sites and manages their lifecycle. Rules live on the Site aggregate.</summary>
+internal sealed class SiteCommandService(
+    ISiteRepository sites, ITowerRepository towers, IUnitOfWork unitOfWork, TimeProvider timeProvider) : ISiteCommandService
 {
     public async Task<SiteDetailDto> CreateAsync(CreateSiteRequest request, CancellationToken cancellationToken)
     {
@@ -29,9 +31,24 @@ internal sealed class SiteCommandService(ISiteRepository sites, IUnitOfWork unit
         return SiteMapper.ToDetail(tower, timeProvider.Today());
     }
 
+    public Task<SiteDetailDto> ChangeStatusAsync(int siteId, ChangeSiteStatusRequest request, CancellationToken cancellationToken) =>
+        UpdateAsync(siteId, site => site.ChangeStatus(request.Status, timeProvider.Today()), cancellationToken);
+
+    public Task<SiteDetailDto> RenameAsync(int siteId, RenameSiteRequest request, CancellationToken cancellationToken) =>
+        UpdateAsync(siteId, site => site.Rename(request.Name), cancellationToken);
+
+    private async Task<SiteDetailDto> UpdateAsync(int siteId, Action<Site> change, CancellationToken cancellationToken)
+    {
+        var tower = await towers.GetForUpdateBySiteIdAsync(siteId, cancellationToken)
+            ?? throw new NotFoundException(nameof(Site), siteId);
+        change(tower.Site);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return SiteMapper.ToDetail(tower, timeProvider.Today());
+    }
+
     private static Site NewSite(CreateSiteRequest request, DateTime createdAtUtc)
     {
-        var location = new SiteLocation(request.CountryCode.ToUpperInvariant(), request.City, request.Latitude, request.Longitude);
+        var location = new SiteLocation(request.CountryCode, request.City, request.Latitude, request.Longitude);
         return new Site(request.SiteCode, request.Name, location, SiteStatus.Planned, createdAtUtc);
     }
 }

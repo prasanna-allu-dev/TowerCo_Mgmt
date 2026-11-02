@@ -4,3 +4,4 @@ import { sitesApi as httpSitesApi } from './sitesApi';
 
 export type * from './contract';
 export const sitesApi = USE_MOCK_API ? mockSitesApi : httpSitesApi;
+export { lifecycleApi } from './lifecycleApi';
