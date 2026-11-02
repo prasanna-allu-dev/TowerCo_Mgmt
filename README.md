@@ -21,6 +21,7 @@ All data in this repository is **fictional** and exists for demonstration only.
 - [Use cases](#use-cases)
 - [Feature status](#feature-status)
 - [Architecture at a glance](#architecture-at-a-glance)
+- [Target architecture (proposed)](#target-architecture-proposed)
 - [Tech stack](#tech-stack)
 - [Repository layout](#repository-layout)
 - [Getting started](#getting-started)
@@ -99,6 +100,164 @@ flowchart LR
 - **Errors as ProblemDetails**: domain exceptions map to HTTP 400, 404 or 409 in one handler.
 
 Full detail: [Backend architecture](docs/architecture/2026-11-02_19-06-37_backend-architecture.md) and [UI architecture](docs/architecture/2026-11-02_19-06-37_ui-architecture.md).
+
+## Target architecture (proposed)
+
+> **Proposed, not approved.** How the system grows from today's sites and tenancies app into a platform that reads tower sensors, raises alarms and runs work orders to closure. Interactive version: [docs/2026-11-02_13-15-06_target-architecture.html](docs/2026-11-02_13-15-06_target-architecture.html). Agreed scope lives in [CLAUDE.md](CLAUDE.md). Sites, operators and readings are fictional.
+
+Legend used below: **built** = in the code today, **proposed** = design only.
+
+<details open>
+<summary><b>1. System view: from tower sensor to technician and back</b></summary>
+
+```mermaid
+flowchart LR
+    subgraph Field["Field (tower site)"]
+        SENS[Tower sensors<br/>power, battery, generator,<br/>shelter climate, door,<br/>aviation light, tilt]
+        GW[Site gateway<br/>edge RTU, MQTT over cellular]
+        SIM[Telemetry simulator<br/>Function, demo]
+        SENS --> GW
+    end
+
+    subgraph Ingestion["Ingestion"]
+        HUB[Azure IoT Hub<br/>device identity, twin config]
+        FN[TelemetryIngest Function<br/>validate, roll up, alarm rules]
+        COS[(Azure Cosmos DB<br/>readings, rollups, alarm state)]
+        LAKE[(Data Lake<br/>raw archive)]
+        BUS[[Service Bus<br/>tower-alarms]]
+        HUB --> FN
+        FN --> COS
+        COS -.change feed.-> LAKE
+        FN -->|alarm| BUS
+    end
+
+    subgraph Core["Core platform"]
+        API[TowerCo API<br/>Portfolio, Commercial,<br/>Monitoring, Work orders]
+        WK[Alarm and work order worker<br/>dedupe, open, escalate]
+        SQL[(SQLite now<br/>Azure SQL later)]
+        BLOB[(Blob storage<br/>job photos, reports)]
+        BUS --> WK --> API
+        API --> SQL
+        API --> BLOB
+    end
+
+    subgraph People["People and channels"]
+        WEB[React web app<br/>ops, commercial, manager]
+        RT[SignalR live updates]
+        TECH[Technician PWA]
+        NOTE[Operator notifications<br/>email, webhook]
+    end
+
+    GW --> HUB
+    SIM --> FN
+    API --> WEB
+    API --> RT --> WEB
+    API --> TECH
+    WK --> NOTE
+
+    classDef built fill:#d1fae5,stroke:#047857,color:#064e3b
+    classDef proposed fill:#f1f5f9,stroke:#64748b,color:#1e293b,stroke-dasharray:4 3
+    class API,SQL,WEB,FN,SIM built
+    class SENS,GW,HUB,COS,LAKE,BUS,WK,BLOB,RT,TECH,NOTE proposed
+```
+
+Cross-cutting: Entra ID sign-in and roles, Key Vault, Application Insights and Azure Monitor, Bicep and GitHub Actions, Static Web Apps and App Service hosting.
+
+</details>
+
+<details>
+<summary><b>2. Telemetry: one reading, three paths</b></summary>
+
+```mermaid
+flowchart LR
+    R[Sensor reading] --> FN[TelemetryIngest]
+    FN -->|hot: rule breach| AS[(alarm-state<br/>one active alarm per tower and sensor, ETag)]
+    AS --> BUS[[Service Bus: AlarmRaised]]
+    FN -->|warm| RAW[(readings)]
+    FN -->|warm: per-minute patch| ROLL[(rollups<br/>partition tower > sensor > day)]
+    ROLL --> HEALTH[Tower health page and trends]
+    RAW -.cold: change feed.-> ARC[Archive Function] -.-> LAKE[(Data Lake)]
+```
+
+| Path | Purpose |
+|------|---------|
+| Hot | Alarms. One active alarm per tower and sensor, so a flapping sensor does not open many work orders |
+| Warm | Health page and trend charts read per-minute roll-ups; business data stays relational |
+| Cold | Every raw reading archived for audit, analytics and replay; Cosmos DB time to live keeps hot storage small |
+
+</details>
+
+<details>
+<summary><b>3. Work order lifecycle</b></summary>
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> AlarmRaised
+    AlarmRaised --> Open: Critical auto-opens
+    Open --> Triaged
+    Triaged --> Assigned
+    Assigned --> InProgress
+    InProgress --> Completed
+    Completed --> Verified: telemetry stable or sign-off
+    Verified --> Closed
+    Closed --> [*]
+
+    Open --> Cancelled: with reason
+    Triaged --> Cancelled: with reason
+    Assigned --> Escalated: SLA breach
+    InProgress --> Escalated: SLA breach
+    Escalated --> InProgress
+    Completed --> Assigned: Reopened (verification fails)
+    Cancelled --> [*]
+```
+
+Illegal moves raise `InvalidWorkOrderTransitionException` (409). The built six-state machine (Open, Assigned, InProgress, OnHold, Completed, Cancelled) is the first slice of this.
+
+</details>
+
+<details>
+<summary><b>4. Domain additions</b></summary>
+
+```mermaid
+erDiagram
+    TOWER ||--o{ SITE_INFRASTRUCTURE : "TowerCo power kit (built)"
+    TOWER ||--o{ EQUIPMENT : "tenant-owned (built)"
+    TOWER ||--o{ SENSOR : has
+    SENSOR }o--o| SITE_INFRASTRUCTURE : watches
+    SENSOR }o--o| EQUIPMENT : watches
+    SENSOR ||--o{ TELEMETRY_READING : "per-minute roll-up (Cosmos DB)"
+    SENSOR ||--o{ ALARM : raises
+    ALARM_RULE ||--o{ ALARM : "evaluated by"
+    ALARM ||--o| WORK_ORDER : opens
+    TOWER ||--o{ WORK_ORDER : has
+    WORK_ORDER ||--o{ WORK_ORDER_EVENT : "audit trail"
+    TECHNICIAN ||--o{ WORK_ORDER : "assigned to"
+```
+
+Notification rule: an alarm on tenant equipment notifies that operator; an alarm on TowerCo site infrastructure that keeps the tower powered or cooled notifies every tenant on the tower.
+
+</details>
+
+<details>
+<summary><b>5. Delivery order</b></summary>
+
+```mermaid
+flowchart LR
+    P1["Phase 1 (now)<br/>Portfolio and leasing<br/>React + API + SQLite"]:::built
+    P5["Phase 5<br/>Monitoring<br/>sensors, alarms, health page"]:::proposed
+    P6["Phase 6<br/>Work orders<br/>state machine, SLA, assignment"]:::proposed
+    P7["Phase 7<br/>Azure and field<br/>IoT Hub, Cosmos DB, Service Bus,<br/>Azure SQL, Entra ID, technician app"]:::proposed
+    P1 --> P5 --> P6 --> P7
+    classDef built fill:#d1fae5,stroke:#047857,color:#064e3b
+    classDef proposed fill:#f1f5f9,stroke:#64748b,color:#1e293b,stroke-dasharray:4 3
+```
+
+Phases 5 and 6 need no Azure services: the simulator calls the API and an in-process queue stands in for Service Bus behind the same interface.
+
+</details>
+
+**Open questions:** per-country data residency; build work orders in-house or integrate an existing maintenance system; auto-open on Critical only or also repeated Warnings.
 
 ## Tech stack
 

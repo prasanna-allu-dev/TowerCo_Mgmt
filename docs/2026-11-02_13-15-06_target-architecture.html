@@ -199,7 +199,7 @@ footer { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--lin
         <g class="node n-prop" data-id="sim" tabindex="0" role="button" aria-label="Telemetry simulator">
           <rect class="b" x="24" y="420" width="192" height="66" rx="5"/>
           <text class="n-t" x="38" y="446">Telemetry simulator</text>
-          <text class="n-s" x="38" y="468">.NET console, demo source</text>
+          <text class="n-s" x="38" y="468">Simulator Function, demo</text>
         </g>
 
         <!-- ingestion -->
@@ -211,18 +211,23 @@ footer { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--lin
         <g class="node n-later" data-id="stream" tabindex="0" role="button" aria-label="Stream processor">
           <rect class="b" x="258" y="176" width="204" height="72" rx="5"/>
           <text class="n-t" x="272" y="202">Stream processor</text>
-          <text class="n-s" x="272" y="222">Functions: normalise,</text>
-          <text class="n-s" x="272" y="238">aggregate, evaluate rules</text>
+          <text class="n-s" x="272" y="222">TelemetryIngest Function:</text>
+          <text class="n-s" x="272" y="238">validate, roll up, alarm rules</text>
         </g>
         <g class="node n-later" data-id="iothub" tabindex="0" role="button" aria-label="Azure IoT Hub">
           <rect class="b" x="258" y="312" width="204" height="66" rx="5"/>
           <text class="n-t" x="272" y="338">Azure IoT Hub</text>
           <text class="n-s" x="272" y="360">Device identity, twin config</text>
         </g>
+        <g class="node n-later" data-id="cosmos" tabindex="0" role="button" aria-label="Sensor data store, Azure Cosmos DB">
+          <rect class="b" x="258" y="404" width="182" height="56" rx="5"/>
+          <text class="n-t" x="272" y="426">Azure Cosmos DB</text>
+          <text class="n-s" x="272" y="446">readings, rollups, alarms</text>
+        </g>
         <g class="node n-later" data-id="lake" tabindex="0" role="button" aria-label="Raw archive">
-          <rect class="b" x="258" y="430" width="204" height="66" rx="5"/>
-          <text class="n-t" x="272" y="456">Raw archive</text>
-          <text class="n-s" x="272" y="478">Data Lake, every reading</text>
+          <rect class="b" x="258" y="478" width="182" height="52" rx="5"/>
+          <text class="n-t" x="272" y="498">Raw archive</text>
+          <text class="n-s" x="272" y="518">Data Lake via change feed</text>
         </g>
 
         <!-- core -->
@@ -293,12 +298,12 @@ footer { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--lin
         <line class="flow" x1="216" y1="345" x2="254" y2="345" marker-end="url(#a)"/>
         <path class="flow" d="M216 453 L236 453 L236 365 L254 365" marker-end="url(#a)"/>
         <line class="flow" x1="360" y1="312" x2="360" y2="252" marker-end="url(#a)"/>
-        <line class="flow-cold" x1="360" y1="378" x2="360" y2="426" marker-end="url(#ac)"/>
+        <line class="flow-cold" x1="349" y1="460" x2="349" y2="474" marker-end="url(#ac)"/>
         <line class="flow-hot" x1="360" y1="176" x2="360" y2="126" marker-end="url(#ah)"/>
         <text class="lbl" x="366" y="156">alarm</text>
-        <path class="flow" d="M462 222 L484 222 L484 452 L500 452" marker-end="url(#a)"/>
-        <text class="lbl" x="408" y="276">aggregates</text>
-        <path class="flow-hot" d="M462 89 L478 89 L478 350 L500 350" marker-end="url(#ah)"/>
+        <path class="flow" d="M462 236 L474 236 L474 432 L444 432" marker-end="url(#a)"/>
+        <text class="lbl" x="406" y="296">to Cosmos</text>
+        <path class="flow-hot" d="M462 89 L486 89 L486 350 L500 350" marker-end="url(#ah)"/>
         <line class="flow" x1="580" y1="396" x2="580" y2="426" marker-end="url(#a)"/>
         <line class="flow" x1="740" y1="396" x2="740" y2="426" marker-end="url(#a)"/>
         <line class="flow" x1="660" y1="330" x2="660" y2="296" marker-end="url(#a)"/>
@@ -330,9 +335,9 @@ footer { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--lin
       <thead><tr><th>Sensor</th><th>Measures</th><th>Unit</th><th>Send rate</th><th>Proposed alarm rule</th><th>Linked to</th></tr></thead>
       <tbody>
         <tr><td>Power meter</td><td>Mains present, load, active source</td><td class="num">V, A</td><td class="num">1 min</td><td><span class="chip bad">Critical</span> mains lost for 5 min</td><td>Tower (shared)</td></tr>
-        <tr><td>Battery bank monitor</td><td>Voltage, state of charge</td><td class="num">V, %</td><td class="num">1 min</td><td><span class="chip warn">Warning</span> below 40% &middot; <span class="chip bad">Critical</span> below 20%</td><td>Battery Bank</td></tr>
-        <tr><td>Generator controller</td><td>Fuel level, run hours, start result</td><td class="num">%, h</td><td class="num">5 min</td><td><span class="chip warn">Warning</span> fuel below 25% &middot; <span class="chip bad">Critical</span> failed start</td><td>Diesel Generator</td></tr>
-        <tr><td>Shelter climate</td><td>Temperature, humidity</td><td class="num">&deg;C, %</td><td class="num">5 min</td><td><span class="chip warn">Warning</span> above 35 &deg;C &middot; <span class="chip bad">Critical</span> above 45 &deg;C</td><td>Air Conditioner</td></tr>
+        <tr><td>Battery bank monitor</td><td>Voltage, state of charge</td><td class="num">V, %</td><td class="num">1 min</td><td><span class="chip warn">Warning</span> below 40% &middot; <span class="chip bad">Critical</span> below 20%</td><td>Site battery (TowerCo)</td></tr>
+        <tr><td>Generator controller</td><td>Fuel level, run hours, start result</td><td class="num">%, h</td><td class="num">5 min</td><td><span class="chip warn">Warning</span> fuel below 25% &middot; <span class="chip bad">Critical</span> failed start</td><td>Site generator (TowerCo)</td></tr>
+        <tr><td>Shelter climate</td><td>Temperature, humidity</td><td class="num">&deg;C, %</td><td class="num">5 min</td><td><span class="chip warn">Warning</span> above 35 &deg;C &middot; <span class="chip bad">Critical</span> above 45 &deg;C</td><td>Shelter cooling (TowerCo)</td></tr>
         <tr><td>Door contact</td><td>Open or closed</td><td class="num">state</td><td class="num">on change</td><td><span class="chip bad">Critical</span> opened with no technician checked in</td><td>Site</td></tr>
         <tr><td>Aviation obstruction light</td><td>Lamp working</td><td class="num">state</td><td class="num">on change</td><td><span class="chip bad">Critical</span> lamp failure</td><td>Tower (shared)</td></tr>
         <tr><td>Tilt and vibration</td><td>Mast tilt angle</td><td class="num">degrees</td><td class="num">15 min</td><td><span class="chip warn">Warning</span> change above 0.5&deg; from baseline</td><td>Tower structure</td></tr>
@@ -348,9 +353,9 @@ footer { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--lin
     <h2>One reading, three paths</h2>
   </div>
   <div class="paths">
-    <div class="path hot"><h3>Hot path: alarms</h3><p>Stream processor checks each reading against the alarm rule for its sensor type. A breach that lasts the rule's duration publishes <code>AlarmRaised</code> to the Service Bus topic. The worker keeps one active alarm per tower and sensor, so a flapping sensor does not open ten work orders.</p></div>
-    <div class="path warm"><h3>Warm path: health and trends</h3><p>Readings are rolled up to one row per sensor per minute and written to the database. The tower health page and 30-day trend charts read these rows; the API never queries raw telemetry.</p></div>
-    <div class="path cold"><h3>Cold path: archive</h3><p>IoT Hub routes every raw message to the Data Lake. Used for audits, model training and replaying history if an alarm rule changes. Nothing in the app reads it directly.</p></div>
+    <div class="path hot"><h3>Hot path: alarms</h3><p>TelemetryIngest checks each reading against the Domain alarm rule for its sensor type. A breach updates the <code>alarm-state</code> container (one active alarm per tower and sensor, guarded by an ETag check) and publishes <code>AlarmRaised</code> to Service Bus, so a flapping sensor does not open ten work orders.</p></div>
+    <div class="path warm"><h3>Warm path: health and trends</h3><p>Raw readings go to the Cosmos DB <code>readings</code> container, and a per-minute roll-up is patched into <code>rollups</code>. Data is partitioned by tower, then sensor, then day. The tower health page and trend charts read roll-ups through a telemetry repository; business data stays in the relational database.</p></div>
+    <div class="path cold"><h3>Cold path: archive</h3><p>The Archive Function reads the Cosmos DB change feed and copies every raw reading to the Data Lake. Used for audits, analytics and replaying history if an alarm rule changes. Time to live in Cosmos DB, set in configuration, keeps hot storage small.</p></div>
   </div>
 </section>
 
@@ -358,7 +363,7 @@ footer { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--lin
   <div class="sec-head">
     <span class="eyebrow">Work order flow</span>
     <h2>Walk an alarm through to closure</h2>
-    <p class="muted">Example on seeded site IN-DEL-0002 (Dwarka Sector 12): mains power drops and the shared Diesel Generator fails to start. Step through to see who acts, what is stored and who is told. Fictional data.</p>
+    <p class="muted">Example on seeded site IN-DEL-0002 (Dwarka Sector 12): mains power drops and the site's diesel generator (TowerCo site infrastructure) fails to start. Step through to see who acts, what is stored and who is told. Fictional data.</p>
   </div>
   <div class="panel wo">
     <div class="states" id="states" role="tablist" aria-label="Work order states"></div>
@@ -379,14 +384,15 @@ footer { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--lin
   <div class="sec-head">
     <span class="eyebrow">Domain additions</span>
     <h2>New entities hang off the existing hierarchy</h2>
-    <p class="muted">Site, Tower, Tenancy, Operator, Equipment and EquipmentType stay as they are. Work orders replace the simpler maintenance tickets in the earlier health plan.</p>
+    <p class="muted">Site, Tower, Tenancy, Operator, Equipment and EquipmentType stay as they are; Equipment is always tenant-owned. TowerCo's own power kit becomes site infrastructure. Work orders replace the simpler maintenance tickets in the earlier health plan.</p>
   </div>
   <div class="tbl-wrap">
     <table>
       <thead><tr><th>Entity</th><th>Key fields</th><th>Relationship</th></tr></thead>
       <tbody>
-        <tr><td><b>Sensor</b></td><td class="mono">Id, TowerId, EquipmentId?, SensorType, DeviceId, Unit</td><td>Tower 1 : many; optionally watches one Equipment item</td></tr>
-        <tr><td><b>TelemetryReading</b></td><td class="mono">SensorId, MinuteUtc, Min, Max, Avg</td><td>Sensor 1 : many (per-minute roll-up)</td></tr>
+        <tr><td><b>SiteInfrastructure</b></td><td class="mono">Id, TowerId, Kind, SerialNumber, InstalledOn</td><td>Tower 1 : many; TowerCo-owned power kit (generator, battery, solar, cooling), not leased</td></tr>
+        <tr><td><b>Sensor</b></td><td class="mono">Id, TowerId, SiteInfrastructureId?, EquipmentId?, SensorType, DeviceId, Unit</td><td>Tower 1 : many; optionally watches one site infrastructure asset or one tenant Equipment item</td></tr>
+        <tr><td><b>TelemetryReading</b></td><td class="mono">SensorId, MinuteUtc, Min, Max, Avg</td><td>Sensor 1 : many (per-minute roll-up, stored in Cosmos DB, not SQL)</td></tr>
         <tr><td><b>AlarmRule</b></td><td class="mono">SensorType, Comparison, WarningValue, CriticalValue, DurationSeconds</td><td>Configuration, one per sensor type</td></tr>
         <tr><td><b>Alarm</b></td><td class="mono">Id, TowerId, SensorId, Severity, Status, RaisedAtUtc, ClearedAtUtc?</td><td>Sensor 1 : many; Status: Active, Acknowledged, Cleared</td></tr>
         <tr><td><b>WorkOrder</b></td><td class="mono">Id, TowerId, AlarmId?, EquipmentId?, Type, Priority, Status, AssigneeId?, SlaDueAtUtc, OpenedAtUtc, ClosedAtUtc?</td><td>Alarm 1 : 0..1; Type: Corrective, Preventive, Installation</td></tr>
@@ -404,7 +410,7 @@ footer { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--lin
         <li>SLA due time comes from priority, held in configuration.</li>
         <li>Check-in is accepted only near the site's latitude and longitude.</li>
         <li>Closing needs verification: telemetry stable below the warning value for a configured period, or a supervisor sign-off.</li>
-        <li>If affected equipment is tenant-owned, or the alarm puts tenant service at risk, the tenant operators are notified.</li>
+        <li>If the alarm is on a tenant's equipment, that operator is notified; if it is on TowerCo site infrastructure that keeps the tower powered or cooled, every tenant on the tower is notified.</li>
       </ul>
     </div>
     <div class="panel">
@@ -412,8 +418,8 @@ footer { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--lin
       <ul class="tight">
         <li><b>Domain</b>: <code>Monitoring/</code> and <code>WorkOrders/</code> folders: entities, state machine, alarm evaluation rules (one class per rule, open for extension).</li>
         <li><b>Application</b>: <code>IAlarmService</code>, <code>IWorkOrderService</code>, <code>INotificationSender</code>, <code>IWorkOrderDispatcher</code>.</li>
-        <li><b>Infrastructure</b>: EF configurations, Service Bus consumer as a hosted service, SignalR and email or webhook senders.</li>
-        <li><b>TowerCo.Ingestion</b> (new): Azure Functions project for the stream processor, reusing Domain alarm rules.</li>
+        <li><b>Infrastructure</b>: EF configurations, Cosmos DB telemetry repository (interface in Application), Service Bus consumer as a hosted service, SignalR and email or webhook senders.</li>
+        <li><b>TowerCo.Ingestion</b> (started): Azure Functions project with <code>TelemetryIngest</code>, <code>Archive</code> (change feed), <code>Heartbeat</code> (silent gateway raises "communication lost") and <code>Simulator</code>, reusing Domain alarm rules. An HTTP ingest endpoint is built for the demo.</li>
         <li><b>Server</b>: thin controllers and a SignalR hub. Same exception-to-ProblemDetails handler.</li>
       </ul>
     </div>
@@ -429,7 +435,7 @@ footer { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--lin
     <div class="phase now"><span class="phase-num">PHASE 1 &middot; NOW</span><h3>Portfolio and leasing</h3><ul class="tight"><li>Sites, towers, tenancies, equipment</li><li>Capacity rules, overview KPIs</li><li>React + API + SQLite</li></ul></div>
     <div class="phase"><span class="phase-num">PHASE 5</span><h3>Monitoring</h3><ul class="tight"><li>Sensor, reading, alarm rule, alarm</li><li>Simulator posts straight to the API</li><li>Tower health page, alarm board</li></ul></div>
     <div class="phase"><span class="phase-num">PHASE 6</span><h3>Work orders</h3><ul class="tight"><li>Lifecycle and state machine</li><li>Auto-open on Critical, SLA escalation</li><li>Assignment, live updates</li></ul></div>
-    <div class="phase"><span class="phase-num">PHASE 7</span><h3>Azure and field</h3><ul class="tight"><li>IoT Hub, Functions, Service Bus</li><li>Azure SQL, Entra ID roles</li><li>Technician app, operator notifications</li></ul></div>
+    <div class="phase"><span class="phase-num">PHASE 7</span><h3>Azure and field</h3><ul class="tight"><li>IoT Hub, Functions, Cosmos DB, Service Bus</li><li>Azure SQL, Entra ID roles</li><li>Technician app, operator notifications</li></ul></div>
   </div>
   <p class="muted">Phases 5 and 6 run without any Azure services: the simulator calls the API, and an in-process queue stands in for Service Bus behind the same interface. Phase 7 swaps in the cloud pieces without touching Domain or Application code.</p>
 </section>
@@ -443,7 +449,8 @@ footer { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--lin
     <div class="decision"><b>Modular monolith</b><span class="muted">One API, clear modules. Split into services only if load or team size needs it.</span></div>
     <div class="decision"><b>Event-driven ingestion</b><span class="muted">Telemetry never hits the API directly in production; Service Bus decouples bursts from the app.</span></div>
     <div class="decision"><b>Rules in Domain</b><span class="muted">Alarm and work order rules are plain classes, shared by the API and the Functions project, fully unit tested.</span></div>
-    <div class="decision open"><b>Telemetry store</b><span class="muted">Per-minute roll-ups in Azure SQL, or Azure Data Explorer if sensor count grows. To decide.</span></div>
+    <div class="decision"><b>Cosmos DB for sensor data</b><span class="muted">Decided 2 Nov 2026. Readings, roll-ups and alarm state in Cosmos DB; business data stays relational.</span></div>
+    <div class="decision open"><b>Data residency</b><span class="muted">Whether each country's sensor data must stay in-region. To decide.</span></div>
     <div class="decision open"><b>Own or integrate work orders</b><span class="muted">Build in-house as shown, or hand off to an existing maintenance system through an adapter. To decide.</span></div>
     <div class="decision open"><b>Auto-open threshold</b><span class="muted">Critical only, or also repeated Warnings within a window. To decide with operations.</span></div>
   </div>
@@ -457,14 +464,15 @@ footer { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--lin
   const NODES = {
     sensors: { t: "Tower sensors", phase: "Phase 7", role: "Measure power, battery, fuel, temperature, door, aviation light and tilt at each tower.", tech: "Modbus, SNMP and dry-contact sensors wired to the site gateway.", data: "Raw readings with sensor id and timestamp." },
     gateway: { t: "Site gateway", phase: "Phase 7", role: "Polls local sensors, buffers readings when the link drops, and sends them upstream.", tech: "Edge RTU with MQTT over cellular, X.509 identity in IoT Hub.", data: "Batched telemetry messages; receives threshold config from the device twin." },
-    sim: { t: "Telemetry simulator", phase: "Phase 5", role: "Generates realistic readings for every seeded tower, including planted faults, so monitoring and work orders can be demoed without hardware.", tech: ".NET console app. Phase 5: posts to the API. Phase 7: sends to IoT Hub as a fake device.", data: "Same message shape as the real gateway." },
-    iothub: { t: "Azure IoT Hub", phase: "Phase 7", role: "Single entry point for all towers. Authenticates each gateway and routes messages.", tech: "Azure IoT Hub with message routing and device twins.", data: "Routes every message to the stream processor and the raw archive." },
-    stream: { t: "Stream processor", phase: "Phase 7", role: "Normalises units, rolls readings up per minute, and checks alarm rules.", tech: "Azure Functions (isolated .NET) in a new TowerCo.Ingestion project, reusing Domain alarm rule classes.", data: "Writes per-minute rows to the database; publishes AlarmRaised and AlarmCleared." },
-    lake: { t: "Raw archive", phase: "Phase 7", role: "Keeps every raw reading for audit, analytics and replay.", tech: "Azure Data Lake Storage Gen2, partitioned by date and tower.", data: "Append-only; nothing in the app reads it directly." },
+    sim: { t: "Telemetry simulator", phase: "Phase 5", role: "Generates readings for every seeded tower, including planted faults, so monitoring and work orders can be demoed without hardware.", tech: "Simulator Function on a timer in TowerCo.Ingestion.", data: "Same message shape as the real gateway." },
+    iothub: { t: "Azure IoT Hub", phase: "Phase 7", role: "Single entry point for all towers. Authenticates each gateway and hands messages to TelemetryIngest.", tech: "Azure IoT Hub; gateways enrolled through Device Provisioning Service with per-device certificates.", data: "Event Hubs compatible endpoint read by TelemetryIngest." },
+    stream: { t: "Stream processor", phase: "Started: HTTP ingest and IoT Hub trigger built; roll-up and Service Bus publisher to do", role: "Validates each message, enriches it from the sensor registry, stores it, rolls it up per minute and checks alarm rules. Invalid messages go to a dead-letter container. A separate Heartbeat Function flags gateways that go silent.", tech: "TelemetryIngest Function (.NET 10 isolated) in TowerCo.Ingestion, reusing Domain alarm rules; managed identity for all bindings.", data: "Writes to Cosmos DB readings, rollups and alarm-state; publishes AlarmRaised and AlarmCleared." },
+    cosmos: { t: "Azure Cosmos DB", phase: "Phase 7 (decided 2 Nov 2026)", role: "Stores sensor data at scale, separate from business data.", tech: "Cosmos DB for NoSQL, autoscale throughput, hierarchical partition key tower, sensor, day; time to live from configuration.", data: "Containers: readings (raw), rollups (per minute), alarm-state (one active alarm per tower and sensor, ETag check)." },
+    lake: { t: "Raw archive", phase: "Phase 7", role: "Keeps every raw reading for audit, analytics and replay.", tech: "Archive Function reads the Cosmos DB change feed into Azure Data Lake Storage Gen2.", data: "Append-only; analytics reads it, the app never does." },
     bus: { t: "Alarm topic", phase: "Phase 7 (in-process queue in Phases 5 and 6)", role: "Decouples alarm bursts from the app so a regional power cut does not overload the API.", tech: "Azure Service Bus topic tower-alarms, with scheduled messages for SLA timers.", data: "AlarmRaised, AlarmCleared, SlaDue events." },
     api: { t: "TowerCo API", phase: "Built (Portfolio, Commercial); Phases 5 and 6 add Monitoring and Work orders", role: "Serves the web app and technician app. Business rules live in Domain and Application, controllers stay thin.", tech: "ASP.NET Core on .NET 10, EF Core, ProblemDetails error handling, Scalar API reference.", data: "Reads and writes the database; pushes changes to SignalR." },
     worker: { t: "Alarm and work order worker", phase: "Phase 6", role: "Consumes alarm events, keeps one active alarm per tower and sensor, opens work orders, runs SLA escalation and verification.", tech: "Hosted service inside the API process at first; can move to its own container later.", data: "Alarm, WorkOrder and WorkOrderEvent rows; sends notifications." },
-    db: { t: "Database", phase: "Built (SQLite); Azure SQL in Phase 7", role: "System of record for portfolio, tenancies, equipment, alarms and work orders, plus per-minute telemetry roll-ups.", tech: "SQLite file today; Azure SQL by connection string change.", data: "All entities; index on SensorId and MinuteUtc for trends." },
+    db: { t: "Database", phase: "Built (SQLite); Azure SQL in Phase 7", role: "System of record for business data: portfolio, tenancies, equipment, sensors registry, alarms and work orders. Sensor readings live in Cosmos DB.", tech: "SQLite file today; Azure SQL by connection string change.", data: "Relational entities through EF Core." },
     blob: { t: "Blob storage", phase: "Phase 7", role: "Stores photos and reports uploaded by technicians when completing jobs.", tech: "Azure Blob Storage with short-lived SAS links issued by the API.", data: "Files referenced from WorkOrderEvent notes." },
     web: { t: "React web app", phase: "Built (portfolio screens); Phases 5 and 6 add alarm board and WO queue", role: "Main screen for operations, commercial users and managers.", tech: "React with Vite and TypeScript; typed API clients.", data: "Calls the API over HTTPS; receives live updates." },
     signalr: { t: "Live updates", phase: "Phase 6", role: "Pushes new alarms and work order status changes so screens update without refresh.", tech: "ASP.NET Core SignalR hub; Azure SignalR Service when scaled out.", data: "AlarmChanged and WorkOrderChanged messages." },
@@ -490,8 +498,8 @@ footer { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--lin
 
   const STEPS = [
     { s: "Alarm raised", who: "Stream processor", what: "At IN-DEL-0002 the power meter reports mains lost and the generator controller reports a failed start. The tower is on battery. AlarmRaised is published.", stored: "Alarm: Critical, Active", told: "Alarm board updates live" },
-    { s: "Open", who: "Worker", what: "No active alarm exists for this tower and sensor, so it keeps this one and, because it is Critical, opens a corrective work order linked to the Diesel Generator (TowerCo shared).", stored: "WorkOrder: Open, priority from severity, SLA due time from config", told: "Operations queue" },
-    { s: "Triaged", who: "Operations user", what: "Confirms priority and checks impact. Both tenants on this tower (Aurora Mobile, Bluewave Telecom) lose service when the Battery Bank runs down.", stored: "WorkOrderEvent: Open to Triaged", told: "Aurora Mobile and Bluewave Telecom: service at risk" },
+    { s: "Open", who: "Worker", what: "No active alarm exists for this tower and sensor, so it keeps this one and, because it is Critical, opens a corrective work order linked to the tower's diesel generator (TowerCo site infrastructure, not tenant equipment).", stored: "WorkOrder: Open, priority from severity, SLA due time from config", told: "Operations queue" },
+    { s: "Triaged", who: "Operations user", what: "Confirms priority and checks impact. Both tenants on this tower (Aurora Mobile, Bluewave Telecom) lose service when the site battery runs down.", stored: "WorkOrderEvent: Open to Triaged", told: "Aurora Mobile and Bluewave Telecom: service at risk" },
     { s: "Assigned", who: "Operations user", what: "Assigns the nearest technician for the Delhi region. The job appears in the technician app.", stored: "WorkOrder.AssigneeId set", told: "Technician" },
     { s: "In progress", who: "Technician", what: "Checks in at the site; location is matched to the site coordinates. The door opens, and because a check-in exists the door sensor does not raise an intrusion alarm.", stored: "WorkOrderEvent: check-in with time", told: "Live status on web app" },
     { s: "Completed", who: "Technician", what: "Clears the generator fault, test-runs it on load, adds notes and photos, marks the job complete.", stored: "Photos in Blob; WorkOrderEvent: Completed", told: "Operations" },

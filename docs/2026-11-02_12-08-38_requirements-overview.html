@@ -216,7 +216,7 @@ footer { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--lin
   <div class="sec-head">
     <span class="eyebrow">Domain model</span>
     <h2>Six entities, capacity derived on read</h2>
-    <p class="muted">One tower per site keeps Phase 1 simple. A tenancy is one operator holding one slot on one tower. Equipment sits on the tower and is either owned by a tenant or shared TowerCo infrastructure.</p>
+    <p class="muted">One tower per site keeps Phase 1 simple. A tenancy is one operator holding one slot on one tower. Equipment sits on the tower and is always owned by a tenant. TowerCo's own power kit is site infrastructure, kept separate.</p>
   </div>
   <div class="diagram">
     <svg viewBox="0 0 800 420" role="img" aria-label="Entity diagram: Operator one-to-many Tenancy, Tenancy many-to-one Tower, Tower one-to-one Site, Tower one-to-many Equipment, Tenancy zero-or-one to many Equipment, Equipment many-to-one EquipmentType">
@@ -272,10 +272,10 @@ footer { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--lin
       <text class="t-title" x="314" y="265">Equipment</text>
       <line x1="301" y1="276" x2="529" y2="276" stroke="var(--accent)" stroke-width="1"/>
       <text class="t-attr" x="314" y="296">Id, TowerId, EquipmentTypeId</text>
-      <text class="t-attr" x="314" y="314" style="fill: var(--accent)">TenancyId (nullable)</text>
+      <text class="t-attr" x="314" y="314" style="fill: var(--accent)">TenancyId (required)</text>
       <text class="t-attr" x="314" y="332">SerialNumber, InstalledOn</text>
       <text class="t-attr" x="314" y="350">MountHeightMetres, Status</text>
-      <text class="t-small" x="314" y="376">TenancyId empty = TowerCo shared</text>
+      <text class="t-small" x="314" y="376">Always tenant-owned</text>
       <!-- EquipmentType -->
       <rect class="box" x="600" y="240" width="190" height="130" rx="4"/>
       <rect class="box-head" x="601" y="241" width="188" height="34" rx="3"/>
@@ -285,8 +285,8 @@ footer { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--lin
       <text class="t-small" x="614" y="340">Radio, Transmission, Power,</text>
       <text class="t-small" x="614" y="356">Cooling, Security</text>
       <!-- equipment edges -->
-      <line class="edge-dash" x1="340" y1="190" x2="340" y2="240"/>
-      <text class="t-card" x="346" y="206">0..1</text>
+      <line class="edge" x1="340" y1="190" x2="340" y2="240"/>
+      <text class="t-card" x="346" y="206">1</text>
       <text class="t-card" x="346" y="234">*</text>
       <line class="edge" x1="500" y1="170" x2="500" y2="240"/>
       <text class="t-card" x="506" y="186">1</text>
@@ -329,12 +329,10 @@ footer { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--lin
           <tr><td>Microwave Dish</td><td>Transmission</td><td>Aurora Mobile</td><td><span class="chip ok">Installed</span></td></tr>
           <tr><td>4G Remote Radio Unit</td><td>Radio</td><td>Bluewave Telecom</td><td><span class="chip ok">Installed</span></td></tr>
           <tr><td>Microwave Dish</td><td>Transmission</td><td>Bluewave Telecom</td><td><span class="chip ok">Installed</span></td></tr>
-          <tr><td>Diesel Generator</td><td>Power</td><td><b>TowerCo shared</b></td><td><span class="chip ok">Installed</span></td></tr>
-          <tr><td>Battery Bank</td><td>Power</td><td><b>TowerCo shared</b></td><td><span class="chip ok">Installed</span></td></tr>
         </tbody>
       </table>
     </div>
-    <p class="muted">Rows match the seed data (fictional operators and sites).</p>
+    <p class="muted">Rows match the seed data (fictional operators and sites). The tower's generator and battery are TowerCo site infrastructure, not tenant equipment, so they are not listed here.</p>
   </div>
 </section>
 
@@ -453,13 +451,13 @@ Waiting for a request.</div>
       <h3>Screens</h3>
       <ol class="rules">
         <li><b>Sites list</b>: country, status and text filters; tenants shown as <span class="mono">x/y</span> with capacity badge</li>
-        <li><b>Site detail</b>: site and tower info, capacity bar, tenancy table, equipment split by tenant and TowerCo shared</li>
+        <li><b>Site detail</b>: site and tower info, capacity bar, tenancy table, equipment grouped by operator</li>
         <li><b>Add tenant form</b>: operator, start date, monthly rent; disabled when tower is full</li>
       </ol>
     </div>
     <div class="panel">
       <h3>Seed data</h3>
-      <p>4 countries (IN, ZA, KE, NG), about 12 sites with mixed statuses, about 5 fictional operators. Tenancies give a mix of full, partly used and empty towers so every rule can be shown. 8 equipment types; each active tower has shared power kit plus tenant radio gear.</p>
+      <p>4 countries (IN, ZA, KE, NG), about 12 sites with mixed statuses, about 5 fictional operators. Tenancies give a mix of full, partly used and empty towers so every rule can be shown. 8 equipment types; each tenancy has a radio and a microwave dish.</p>
       <h3>Out of scope</h3>
       <p class="muted">Create or edit site, map and dashboard, login and roles, ending a tenancy, Azure hosting, pagination.</p>
     </div>
@@ -527,7 +525,7 @@ Waiting for a request.</div>
   <div class="decisions">
     <div class="decision"><b>Slot-based capacity</b><span class="muted">MaxTenants per tower. Structural load later.</span></div>
     <div class="decision"><b>SQLite</b><span class="muted">Zero setup; swap to Azure SQL by connection string.</span></div>
-    <div class="decision"><b>Equipment catalogue</b><span class="muted">Tenant-owned or TowerCo shared; types are data. Display only.</span></div>
+    <div class="decision"><b>Equipment catalogue</b><span class="muted">Always tenant-owned; types are data. TowerCo power kit is separate site infrastructure.</span></div>
     <div class="decision"><b>Clean Architecture</b><span class="muted">Domain, Application, Infrastructure, Server, Tests.</span></div>
     <div class="decision assume"><b>One tower per site</b><span class="muted">Assumption, simplifies Phase 1.</span></div>
     <div class="decision assume"><b>No login in Phase 1</b><span class="muted">Personas are conceptual only.</span></div>
