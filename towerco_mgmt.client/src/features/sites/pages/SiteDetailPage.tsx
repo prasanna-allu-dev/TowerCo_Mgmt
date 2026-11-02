@@ -5,7 +5,7 @@ import { sitesApi } from '@/features/sites/api';
 import { Card, StateMessage } from '@/shared/components';
 import { SiteEquipmentCard } from '@/features/equipment/components';
 import { SiteHealthCard } from '@/features/health/components';
-import { CapacityEditor, SiteInfoCard, SiteStatusActions, TenanciesTable, TenancyActions, TowerCapacityCard } from '@/features/sites/components';
+import { CapacityEditor, SiteInfoCard, SiteInfrastructureCard, SiteStatusActions, TenanciesTable, TenancyActions, TowerCapacityCard } from '@/features/sites/components';
 import { LEASE_MANAGERS, SITE_MANAGERS } from '@/features/sites/constants/lifecycle';
 import { usePersona } from '@/app/usePersona';
 import { useApi } from '@/shared/hooks/useApi';
@@ -40,6 +40,7 @@ function SiteDetailPage() {
                     </Card>
                     <StateMessage loading={equipment.loading} error={equipment.error} />
                     {equipment.data && <SiteEquipmentCard items={equipment.data} />}
+                    <SiteInfrastructureCard items={site.infrastructure ?? []} />
                     {health.data && <SiteHealthCard health={health.data} />}
                 </>
             )}

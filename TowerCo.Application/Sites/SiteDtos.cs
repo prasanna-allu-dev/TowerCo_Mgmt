@@ -16,8 +16,12 @@ public sealed record EquipmentDto(
     int Id, string TypeName, EquipmentCategory Category, int TenancyId, string Owner,
     string SerialNumber, DateOnly InstalledOn, decimal? MountHeightMetres, EquipmentStatus Status);
 
-/// <summary>Everything about a site: summary fields plus location, tower, tenancies and equipment.</summary>
+/// <summary>TowerCo-owned power or cooling kit on the tower (not leased).</summary>
+public sealed record SiteInfrastructureDto(int Id, SiteInfrastructureKind Kind, string SerialNumber, DateOnly InstalledOn);
+
+/// <summary>Everything about a site: summary fields plus location, tower, tenancies, equipment and TowerCo infrastructure.</summary>
 public sealed record SiteDetailDto(
     int Id, string SiteCode, string Name, string CountryCode, string City, SiteStatus Status, int TowerId,
     CapacitySummaryDto Capacity, double Latitude, double Longitude, TowerDto Tower,
-    IReadOnlyList<TenancyDto> Tenancies, IReadOnlyList<EquipmentDto> Equipment);
+    IReadOnlyList<TenancyDto> Tenancies, IReadOnlyList<EquipmentDto> Equipment,
+    IReadOnlyList<SiteInfrastructureDto> Infrastructure);

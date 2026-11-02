@@ -21,11 +21,23 @@ export interface Tower {
     maxTenants: number;
 }
 
+export type SiteInfrastructureKind = 'Generator' | 'Battery' | 'Solar' | 'Cooling';
+
+/** TowerCo-owned power or cooling kit on the tower. Not leased, no capacity impact. */
+export interface SiteInfrastructure {
+    id: number;
+    kind: SiteInfrastructureKind;
+    serialNumber: string;
+    installedOn: string;
+}
+
 export interface SiteDetail extends SiteSummary {
     latitude: number;
     longitude: number;
     tower: Tower;
     tenancies: Tenancy[];
+    /** Optional because the mock API does not model it. */
+    infrastructure?: SiteInfrastructure[];
 }
 
 /** UC1 thin slice: registers a site and its tower in one request (POST /api/sites). */

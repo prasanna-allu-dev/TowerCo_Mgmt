@@ -12,6 +12,7 @@ public sealed class TowerCoDbContext(DbContextOptions<TowerCoDbContext> options)
     public DbSet<Tenancy> Tenancies => Set<Tenancy>();
     public DbSet<EquipmentType> EquipmentTypes => Set<EquipmentType>();
     public DbSet<Equipment> Equipment => Set<Equipment>();
+    public DbSet<SiteInfrastructure> SiteInfrastructure => Set<SiteInfrastructure>();
     public DbSet<WorkOrder> WorkOrders => Set<WorkOrder>();
     public DbSet<SensorReading> SensorReadings => Set<SensorReading>();
     public DbSet<Inspection> Inspections => Set<Inspection>();

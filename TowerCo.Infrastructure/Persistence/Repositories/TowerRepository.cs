@@ -22,5 +22,7 @@ public sealed class TowerRepository(TowerCoDbContext db) : ITowerRepository
     private IQueryable<Tower> WithGraph() => db.Towers
         .Include(t => t.Site)
         .Include(t => t.Tenancies).ThenInclude(t => t.Operator)
-        .Include(t => t.Equipment).ThenInclude(e => e.EquipmentType);
+        .Include(t => t.Equipment).ThenInclude(e => e.EquipmentType)
+        .Include(t => t.Infrastructure)
+        .AsSplitQuery();
 }

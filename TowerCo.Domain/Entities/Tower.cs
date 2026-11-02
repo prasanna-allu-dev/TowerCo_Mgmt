@@ -10,6 +10,7 @@ public sealed class Tower : Entity
 {
     private readonly List<Tenancy> _tenancies = [];
     private readonly List<Equipment> _equipment = [];
+    private readonly List<SiteInfrastructure> _infrastructure = [];
 
     private Tower() { }
 
@@ -30,6 +31,7 @@ public sealed class Tower : Entity
     public int MaxTenants { get; private set; }
     public IReadOnlyCollection<Tenancy> Tenancies => _tenancies;
     public IReadOnlyCollection<Equipment> Equipment => _equipment;
+    public IReadOnlyCollection<SiteInfrastructure> Infrastructure => _infrastructure;
 
     public int ActiveTenantCount(DateOnly asOf) => _tenancies.Count(t => t.IsActiveOn(asOf));
 
@@ -106,6 +108,14 @@ public sealed class Tower : Entity
         var equipment = new Equipment(this, type, serialNumber, installedOn, mountHeightMetres, tenancy);
         _equipment.Add(equipment);
         return equipment;
+    }
+
+    /// <summary>Adds TowerCo-owned power or cooling kit. It is not leased and does not use tenant slots.</summary>
+    public SiteInfrastructure InstallInfrastructure(SiteInfrastructureKind kind, string serialNumber, DateOnly installedOn)
+    {
+        var item = new SiteInfrastructure(this, kind, serialNumber, installedOn);
+        _infrastructure.Add(item);
+        return item;
     }
 
     private void EnsureCanLease(Operator mobileOperator, DateOnly start, DateOnly? end)

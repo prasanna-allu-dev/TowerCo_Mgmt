@@ -6,3 +6,4 @@ export { default as TenanciesTable } from './TenanciesTable';
 export { default as SiteStatusActions } from './SiteStatusActions';
 export { default as CapacityEditor } from './CapacityEditor';
 export { default as TenancyActions } from './TenancyActions';
+export { default as SiteInfrastructureCard } from './SiteInfrastructureCard';

@@ -16,5 +16,8 @@ internal sealed class TowerConfiguration : IEntityTypeConfiguration<Tower>
             .HasForeignKey(x => x.TowerId).OnDelete(DeleteBehavior.Cascade);
         builder.Navigation(t => t.Tenancies).UsePropertyAccessMode(PropertyAccessMode.Field);
         builder.Navigation(t => t.Equipment).UsePropertyAccessMode(PropertyAccessMode.Field);
+        builder.HasMany(t => t.Infrastructure).WithOne(x => x.Tower)
+            .HasForeignKey(x => x.TowerId).OnDelete(DeleteBehavior.Cascade);
+        builder.Navigation(t => t.Infrastructure).UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

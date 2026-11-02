@@ -1,4 +1,5 @@
 using TowerCo.Domain.Entities;
+using TowerCo.Domain.Enums;
 
 namespace TowerCo.Infrastructure.Persistence.Seed;
 
@@ -7,6 +8,7 @@ internal sealed class SeedData
 {
     private const int RadioMountOffsetMetres = 2;
     private const string SerialFormat = "{0}-EQ-{1:D3}";
+    private const string InfrastructureSerialFormat = "{0}-INF-{1:D3}";
 
     private readonly Dictionary<string, Operator> _operators;
     private readonly Dictionary<string, EquipmentType> _equipmentTypes;
@@ -33,7 +35,24 @@ internal sealed class SeedData
             AddTenancyWithRadio(tower, tenancySeed);
         }
 
+        if (site.Status == SiteStatus.Active)
+        {
+            InstallPowerKit(tower);
+        }
+
         return site;
+    }
+
+    /// <summary>TowerCo power on every active tower: solar on rooftops, a diesel generator elsewhere, plus a battery bank.</summary>
+    private static void InstallPowerKit(Tower tower)
+    {
+        var installedOn = DateOnly.FromDateTime(SeedCatalogue.SeededAtUtc);
+        var primary = tower.TowerType == TowerType.Rooftop ? SiteInfrastructureKind.Solar : SiteInfrastructureKind.Generator;
+        foreach (var kind in new[] { primary, SiteInfrastructureKind.Battery })
+        {
+            var serial = string.Format(InfrastructureSerialFormat, tower.Site.SiteCode, tower.Infrastructure.Count + 1);
+            tower.InstallInfrastructure(kind, serial, installedOn);
+        }
     }
 
     /// <summary>Each tenancy gets a radio plus a microwave backhaul dish; both are removed when the tenancy has ended.</summary>

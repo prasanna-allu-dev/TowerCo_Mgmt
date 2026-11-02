@@ -23,7 +23,8 @@ public static class SiteMapper
             tower.Id, ToCapacity(tower, asOf), site.Location.Latitude, site.Location.Longitude,
             new TowerDto(tower.Id, tower.TowerType, tower.HeightMetres, tower.MaxTenants),
             tower.Tenancies.OrderBy(t => t.StartDate).Select(ToTenancy).ToList(),
-            tower.Equipment.Select(ToEquipment).ToList());
+            tower.Equipment.Select(ToEquipment).ToList(),
+            tower.Infrastructure.Select(i => new SiteInfrastructureDto(i.Id, i.Kind, i.SerialNumber, i.InstalledOn)).ToList());
     }
 
     public static TenancyDto ToTenancy(Tenancy tenancy) => new(

@@ -100,6 +100,19 @@ public sealed class PersistenceTests : IAsyncLifetime
         Assert.True(equipment.Tower.SiteId > 0);
     }
 
+    [Fact]
+    public async Task Seed_ActiveTowers_GetPowerKit_SolarOnRooftops()
+    {
+        await using var context = CreateContext();
+
+        var towers = await context.Towers.Include(t => t.Site).Include(t => t.Infrastructure).ToListAsync();
+
+        Assert.All(towers.Where(t => t.Site.Status != SiteStatus.Active), t => Assert.Empty(t.Infrastructure));
+        Assert.All(towers.Where(t => t.Site.Status == SiteStatus.Active), t => Assert.Equal(
+            [t.TowerType == TowerType.Rooftop ? SiteInfrastructureKind.Solar : SiteInfrastructureKind.Generator, SiteInfrastructureKind.Battery],
+            t.Infrastructure.OrderBy(i => i.Id).Select(i => i.Kind)));
+    }
+
     private TowerCoDbContext CreateContext() =>
         new(new DbContextOptionsBuilder<TowerCoDbContext>().UseSqlite(_connection).Options);
 }
