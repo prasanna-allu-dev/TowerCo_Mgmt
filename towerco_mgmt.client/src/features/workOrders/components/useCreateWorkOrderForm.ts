@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { workOrdersApi } from '@/features/workOrders/api';
-import { API_ERROR_FALLBACK } from '@/shared/constants/api';
 import { MS_PER_DAY } from '@/shared/constants/domain';
 import { DEFAULT_DUE_IN_DAYS } from '@/features/workOrders/constants/workOrders';
 import type { CreateWorkOrderRequest, WorkOrder } from '@/features/workOrders/types';
+import { useAsyncAction } from '@/shared/hooks/useAsyncAction';
 
 export type WorkOrderDraft = Omit<CreateWorkOrderRequest, 'siteId' | 'assignee'> & { siteId: string; assignee: string };
 
@@ -19,20 +19,13 @@ const toRequest = (draft: WorkOrderDraft): CreateWorkOrderRequest =>
 
 export function useCreateWorkOrderForm(onCreated: (workOrder: WorkOrder) => void) {
     const [draft, setDraft] = useState<WorkOrderDraft>(emptyDraft);
-    const [error, setError] = useState<string>();
-    const [saving, setSaving] = useState(false);
+    const save = useAsyncAction(workOrdersApi.create, (created: WorkOrder) => { setDraft(emptyDraft()); onCreated(created); });
 
     const update = (patch: Partial<WorkOrderDraft>) => setDraft(current => ({ ...current, ...patch }));
-
     const submit = (e: FormEvent) => {
         e.preventDefault();
-        setSaving(true);
-        setError(undefined);
-        workOrdersApi.create(toRequest(draft))
-            .then(created => { setDraft(emptyDraft()); onCreated(created); })
-            .catch((err: unknown) => setError(err instanceof Error ? err.message : API_ERROR_FALLBACK))
-            .finally(() => setSaving(false));
+        void save.run(toRequest(draft));
     };
 
-    return { draft, update, submit, error, saving };
+    return { draft, update, submit, error: save.error, saving: save.pending };
 }

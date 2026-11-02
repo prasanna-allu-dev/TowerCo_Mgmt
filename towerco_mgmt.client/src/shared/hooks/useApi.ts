@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { API_ERROR_FALLBACK } from '@/shared/constants/api';
+import { toErrorMessage } from '@/shared/utils/errors';
 
 interface ApiState<T> {
     data: T | undefined;
@@ -18,7 +18,7 @@ export function useApi<T>(fetcher: () => Promise<T>, deps: unknown[] = []): ApiS
         setError(undefined);
         fetcher()
             .then(setData)
-            .catch((e: unknown) => setError(e instanceof Error ? e.message : API_ERROR_FALLBACK))
+            .catch((e: unknown) => setError(toErrorMessage(e)))
             .finally(() => setLoading(false));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, deps);

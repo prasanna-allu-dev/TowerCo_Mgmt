@@ -3,10 +3,10 @@ import FormField from './FormField';
 import { bind } from './stepProps';
 import type { StepProps } from './stepProps';
 
-function SiteStep(props: StepProps) {
+function IdentityFields(props: StepProps) {
     const { errors } = props;
     return (
-        <div className="form-grid">
+        <>
             <FormField label="Site code" error={errors.siteCode} hint={`Country-City-Number, e.g. ${SITE_CODE_EXAMPLE}`}>
                 <input {...bind(props, 'siteCode')} placeholder={SITE_CODE_EXAMPLE} />
             </FormField>
@@ -19,6 +19,14 @@ function SiteStep(props: StepProps) {
                     {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.name}</option>)}
                 </select>
             </FormField>
+        </>
+    );
+}
+
+function LocationFields(props: StepProps) {
+    const { errors } = props;
+    return (
+        <>
             <FormField label="City" error={errors.city}>
                 <input {...bind(props, 'city')} placeholder="Pune" />
             </FormField>
@@ -28,6 +36,15 @@ function SiteStep(props: StepProps) {
             <FormField label="Longitude" error={errors.longitude}>
                 <input {...bind(props, 'longitude')} type="number" step="any" placeholder="73.7389" />
             </FormField>
+        </>
+    );
+}
+
+function SiteStep(props: StepProps) {
+    return (
+        <div className="form-grid">
+            <IdentityFields {...props} />
+            <LocationFields {...props} />
         </div>
     );
 }

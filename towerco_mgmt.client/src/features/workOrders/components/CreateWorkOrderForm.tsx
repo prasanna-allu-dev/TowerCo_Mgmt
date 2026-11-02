@@ -1,12 +1,43 @@
 import { sitesApi } from '@/features/sites/api';
+import type { SiteSummary } from '@/features/sites/types';
 import { FIELD_ENGINEERS, WORK_ORDER_CATEGORIES, WORK_ORDER_PRIORITIES } from '@/features/workOrders/constants/workOrders';
-import { useApi } from '@/shared/hooks/useApi';
 import type { WorkOrder } from '@/features/workOrders/types';
+import { SelectField } from '@/shared/components';
+import { useApi } from '@/shared/hooks/useApi';
 import { useCreateWorkOrderForm } from './useCreateWorkOrderForm';
+
+type FormState = ReturnType<typeof useCreateWorkOrderForm>;
 
 interface CreateWorkOrderFormProps {
     onCreated: (workOrder: WorkOrder) => void;
     onCancel: () => void;
+}
+
+const toSiteOption = (s: SiteSummary) => ({ value: String(s.id), label: `${s.siteCode} · ${s.name}` });
+
+function ClassificationFields({ draft, update }: Pick<FormState, 'draft' | 'update'>) {
+    return (
+        <>
+            <SelectField label="Category" value={draft.category} options={WORK_ORDER_CATEGORIES}
+                onChange={v => update({ category: v as WorkOrder['category'] })} />
+            <SelectField label="Priority" value={draft.priority} options={WORK_ORDER_PRIORITIES}
+                onChange={v => update({ priority: v as WorkOrder['priority'] })} />
+            <label>Due date
+                <input className="input" type="date" required value={draft.dueDate} onChange={e => update({ dueDate: e.target.value })} />
+            </label>
+            <SelectField label="Assignee" value={draft.assignee} options={FIELD_ENGINEERS} placeholder="Unassigned"
+                onChange={v => update({ assignee: v })} />
+        </>
+    );
+}
+
+function FormActions({ saving, onCancel }: { saving: boolean; onCancel: () => void }) {
+    return (
+        <div className="wo-actions wo-span-3">
+            <button type="button" className="wo-btn" onClick={onCancel}>Cancel</button>
+            <button type="submit" className="wo-btn primary" disabled={saving}>{saving ? 'Saving...' : 'Create work order'}</button>
+        </div>
+    );
 }
 
 function CreateWorkOrderForm({ onCreated, onCancel }: CreateWorkOrderFormProps) {
@@ -15,42 +46,17 @@ function CreateWorkOrderForm({ onCreated, onCancel }: CreateWorkOrderFormProps) 
 
     return (
         <form className="wo-form" onSubmit={submit}>
-            <label>Site
-                <select className="input" required value={draft.siteId} onChange={e => update({ siteId: e.target.value })}>
-                    <option value="">Select a site</option>
-                    {sites?.map(s => <option key={s.id} value={s.id}>{s.siteCode} · {s.name}</option>)}
-                </select>
-            </label>
+            <SelectField label="Site" required value={draft.siteId} options={sites?.map(toSiteOption) ?? []}
+                placeholder="Select a site" onChange={v => update({ siteId: v })} />
             <label className="wo-span-2">Title
                 <input className="input" required value={draft.title} onChange={e => update({ title: e.target.value })} />
             </label>
-            <label>Category
-                <select className="input" value={draft.category} onChange={e => update({ category: e.target.value as WorkOrder['category'] })}>
-                    {WORK_ORDER_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-            </label>
-            <label>Priority
-                <select className="input" value={draft.priority} onChange={e => update({ priority: e.target.value as WorkOrder['priority'] })}>
-                    {WORK_ORDER_PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
-                </select>
-            </label>
-            <label>Due date
-                <input className="input" type="date" required value={draft.dueDate} onChange={e => update({ dueDate: e.target.value })} />
-            </label>
-            <label>Assignee
-                <select className="input" value={draft.assignee} onChange={e => update({ assignee: e.target.value })}>
-                    <option value="">Unassigned</option>
-                    {FIELD_ENGINEERS.map(n => <option key={n} value={n}>{n}</option>)}
-                </select>
-            </label>
+            <ClassificationFields draft={draft} update={update} />
             <label className="wo-span-3">Description
                 <textarea className="input" rows={3} value={draft.description} onChange={e => update({ description: e.target.value })} />
             </label>
             {error && <p className="alert-error wo-span-3">{error}</p>}
-            <div className="wo-actions wo-span-3">
-                <button type="button" className="wo-btn" onClick={onCancel}>Cancel</button>
-                <button type="submit" className="wo-btn primary" disabled={saving}>{saving ? 'Saving...' : 'Create work order'}</button>
-            </div>
+            <FormActions saving={saving} onCancel={onCancel} />
         </form>
     );
 }

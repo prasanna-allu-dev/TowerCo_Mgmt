@@ -1,45 +1,38 @@
 import { useState } from 'react';
 import { workOrdersApi } from '@/features/workOrders/api';
-import { API_ERROR_FALLBACK } from '@/shared/constants/api';
 import { ASSIGNEE_REQUIRED_STATUS, FIELD_ENGINEERS, WORK_ORDER_STATUS_LABELS, WORK_ORDER_TRANSITIONS } from '@/features/workOrders/constants/workOrders';
 import type { WorkOrder, WorkOrderStatus } from '@/features/workOrders/types';
+import { SelectField } from '@/shared/components';
+import { useAsyncAction } from '@/shared/hooks/useAsyncAction';
 
 interface WorkOrderStatusActionsProps {
     workOrder: WorkOrder;
     onChanged: (workOrder: WorkOrder) => void;
 }
 
+const CANCELLED_STATUS: WorkOrderStatus = 'Cancelled';
+
+const transitionLabel = (status: WorkOrderStatus) =>
+    status === ASSIGNEE_REQUIRED_STATUS ? 'Assign' : `Move to ${WORK_ORDER_STATUS_LABELS[status]}`;
+
 function WorkOrderStatusActions({ workOrder, onChanged }: WorkOrderStatusActionsProps) {
     const [assignee, setAssignee] = useState(workOrder.assignee ?? '');
-    const [error, setError] = useState<string>();
-    const [saving, setSaving] = useState(false);
+    const save = useAsyncAction(workOrdersApi.updateStatus, onChanged);
     const next = WORK_ORDER_TRANSITIONS[workOrder.status];
-
-    const move = (status: WorkOrderStatus) => {
-        setSaving(true);
-        setError(undefined);
-        const request = status === ASSIGNEE_REQUIRED_STATUS ? { status, assignee: assignee || null } : { status };
-        workOrdersApi.updateStatus(workOrder.id, request)
-            .then(onChanged)
-            .catch((err: unknown) => setError(err instanceof Error ? err.message : API_ERROR_FALLBACK))
-            .finally(() => setSaving(false));
-    };
+    const move = (status: WorkOrderStatus) =>
+        save.run(workOrder.id, status === ASSIGNEE_REQUIRED_STATUS ? { status, assignee: assignee || null } : { status });
 
     if (next.length === 0) return <p className="muted">This work order is closed. No further actions.</p>;
     return (
         <div className="wo-status-actions">
             {next.includes(ASSIGNEE_REQUIRED_STATUS) && (
-                <select className="input" value={assignee} onChange={e => setAssignee(e.target.value)}>
-                    <option value="">Select engineer</option>
-                    {FIELD_ENGINEERS.map(n => <option key={n} value={n}>{n}</option>)}
-                </select>
+                <SelectField label="Engineer" value={assignee} options={FIELD_ENGINEERS} placeholder="Select engineer" onChange={setAssignee} />
             )}
             {next.map(status => (
-                <button key={status} className={`wo-btn ${status === 'Cancelled' ? 'danger' : 'primary'}`} disabled={saving} onClick={() => move(status)}>
-                    {status === ASSIGNEE_REQUIRED_STATUS ? 'Assign' : `Move to ${WORK_ORDER_STATUS_LABELS[status]}`}
-                </button>
+                <button key={status} className={`wo-btn ${status === CANCELLED_STATUS ? 'danger' : 'primary'}`}
+                    disabled={save.pending} onClick={() => move(status)}>{transitionLabel(status)}</button>
             ))}
-            {error && <p className="alert-error">{error}</p>}
+            {save.error && <p className="alert-error">{save.error}</p>}
         </div>
     );
 }
