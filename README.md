@@ -15,9 +15,9 @@ A demo platform for a telecom tower company that builds towers and leases slots 
 ![Tests](https://img.shields.io/badge/tests-156%20passing-2ea44f)
 ![Architecture](https://img.shields.io/badge/architecture-Clean-orange)
 
-[![Watch the 4K demo](docs/media/2026-11-03_09-29-19_towerco-demo-poster.png)](docs/media/2026-11-03_09-29-19_towerco-demo-4k.mp4)
+https://github.com/user-attachments/assets/5c9f7013-1b38-41ef-910a-1367aa0a3aa7
 
-**▶ [Watch the 4K demo video](docs/media/2026-11-03_09-29-19_towerco-demo-4k.mp4)** · [Architecture](#-architecture) · [Quick start](#-quick-start) · [Docs](#-documentation)
+**▶ Demo video above** ([4K file](https://github.com/prasanna-allu-dev/TowerCo_Mgmt/raw/main/docs/media/2026-11-03_09-29-19_towerco-demo-4k.mp4)) · [Architecture](#-architecture) · [Quick start](#-quick-start) · [Docs](#-documentation)
 
 <sub>All sites, operators and readings are fictional.</sub>
 
