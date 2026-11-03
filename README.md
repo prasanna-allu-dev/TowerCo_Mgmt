@@ -1,78 +1,103 @@
-# TowerCo Tower Management System
+<div align="center">
 
-> Portfolio, tenancy and field operations platform for a telecom tower company that builds towers and leases slots on them to mobile network operators (MNOs).
+# 📡 TowerCo Tower Management System
+
+**Lease tower space, track capacity and keep every tower healthy, in one place.**
+
+A demo platform for a telecom tower company that builds towers and leases slots on them to mobile network operators.
 
 ![.NET](https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white)
-![ASP.NET Core](https://img.shields.io/badge/ASP.NET%20Core-Web%20API-512BD4)
-![EF Core](https://img.shields.io/badge/EF%20Core-10-6DB33F)
-![SQLite](https://img.shields.io/badge/SQLite-file%20DB-003B57?logo=sqlite&logoColor=white)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
-![TypeScript](https://img.shields.io/badge/TypeScript-7-3178C6?logo=typescript&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)
-![xUnit](https://img.shields.io/badge/tests-xUnit-5E2D79)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
+![EF Core](https://img.shields.io/badge/EF%20Core-10-6DB33F)
+![SQLite](https://img.shields.io/badge/SQLite-seeded-003B57?logo=sqlite&logoColor=white)
+![Azure Functions](https://img.shields.io/badge/Azure%20Functions-ingestion-0062AD?logo=azurefunctions&logoColor=white)
+![Tests](https://img.shields.io/badge/tests-156%20passing-2ea44f)
+![Architecture](https://img.shields.io/badge/architecture-Clean-orange)
 
-All data in this repository is **fictional** and exists for demonstration only.
+[![Watch the 4K demo](docs/media/2026-11-03_09-29-19_towerco-demo-poster.png)](docs/media/2026-11-03_09-29-19_towerco-demo-4k.mp4)
 
----
+**▶ [Watch the 4K demo video](docs/media/2026-11-03_09-29-19_towerco-demo-4k.mp4)** · [Architecture](#-architecture) · [Quick start](#-quick-start) · [Docs](#-documentation)
 
-## Table of contents
+<sub>All sites, operators and readings are fictional.</sub>
 
-- [Overview](#overview)
-- [Use cases](#use-cases)
-- [Feature status](#feature-status)
-- [Architecture at a glance](#architecture-at-a-glance)
-- [Target architecture (proposed)](#target-architecture-proposed)
-- [Tech stack](#tech-stack)
-- [Repository layout](#repository-layout)
-- [Getting started](#getting-started)
-- [Configuration](#configuration)
-- [Testing](#testing)
-- [Documentation](#documentation)
-- [Roadmap](#roadmap)
-- [Engineering standards](#engineering-standards)
+</div>
 
 ---
 
-## Overview
+## ✨ At a glance
 
-TowerCo operates telecom tower sites across several countries. Each **site** carries one **tower**; each tower has a fixed number of **tenant slots** that are leased to **operators** through **tenancies**. Towers also carry **equipment** (antennas, radios, dishes, power and cooling kit), and every item is owned by the tenant whose tenancy installed it. TowerCo does not own shared equipment.
+<table>
+<tr>
+<td width="33%" valign="top">
 
-The system answers four everyday questions:
+### 🏗️ Portfolio
+Register sites and towers, move them through their lifecycle (Planned, Under construction, Active, Decommissioned) and search across 4 countries.
 
-| Persona | Question |
-|---------|----------|
-| Operations user | Which sites do we have, and how do I register a new one? |
-| Commercial user | Does this tower have room for another tenant, and can I add one? |
-| Any user | Show me everything about this site. |
-| Manager | Where is the portfolio, and how well utilised is it? |
+</td>
+<td width="33%" valign="top">
 
-## Use cases
+### 🤝 Leasing
+Add operators as tenants with live capacity checks. End, renew and re-price leases; the tower refuses to be oversold, even for future bookings.
 
-| ID | Persona | Use case |
-|----|---------|----------|
-| UC1 | Operations | Register a new site and its tower; update details over time |
-| UC2 | Commercial | Add an operator as tenant on a tower; see remaining capacity |
-| UC3 | Any user | Search and filter sites (country, status, text); open a full site view |
-| UC4 | Manager | Portfolio overview: KPIs, utilisation by country, alerts |
-| UC5 | Operations / Manager | Tower health from telemetry, inspections and open work orders (proposed) |
+</td>
+<td width="33%" valign="top">
 
-## Feature status
+### 🩺 Operations
+Tower health from sensors, inspections and work orders. Work orders follow a strict state machine. Dashboard flags full, empty and at-risk towers.
 
-| Area | Backend API | UI | Notes |
-|------|:-----------:|:--:|-------|
-| Sites list and filters (UC3) | Built | Built | Country, status, free text |
-| Site detail (UC3) | Built | Built | Site, tower, capacity, tenancies, equipment |
-| Register site and tower (UC1) | Built | Built | Three step wizard at `/configuration/new` |
-| Add tenant with capacity rules (UC2) | Built | Not yet wired | API client exists (`tenanciesApi`); no form uses it yet |
-| Tenancy register | Built | Built | `/tenants` |
-| Equipment register and catalogue | Built | Built | `/equipment` |
-| Portfolio dashboard (UC4) | Built | Built | KPIs, utilisation, rent, renewals, alerts |
-| Work orders | Built | Built | State machine enforced on both sides |
-| Tower health (UC5) | Built | Newly added | `/health`; not yet verified in a browser |
-| Sensor ingestion (Azure Functions) | Built (demo) | n/a | Alarm publisher is a logging stub |
-| Edit site or tower, map view, auth | Planned | Planned | See [Roadmap](#roadmap) |
+</td>
+</tr>
+</table>
 
-## Architecture at a glance
+## 👥 Who uses it
+
+| Persona | Asks | Answered by |
+|---------|------|-------------|
+| 🔎 Any user | "Show me everything about this site." | Sites list with filters, site detail |
+| 💼 Commercial | "Is there room for another tenant?" | Capacity bar, tenancy actions, tenants register |
+| 🛠️ Operations | "How do I register a site and keep it healthy?" | Create site wizard, lifecycle buttons, tower health, work orders |
+| 📊 Manager | "How well is the portfolio used?" | Portfolio dashboard: KPIs, utilisation by country, alerts, renewals |
+
+Switch persona from the top bar ("Viewing as"). Personas shape the menu and the actions shown; real sign-in is out of scope for this demo.
+
+## ✅ What works today
+
+| Area | API | UI |
+|------|:---:|:--:|
+| Sites list, filters and site detail | ✅ | ✅ |
+| Register site and tower (3 step wizard) | ✅ | ✅ |
+| Site lifecycle and tower capacity changes | ✅ | ✅ |
+| End, renew and rent review of tenancies | ✅ | ✅ |
+| Add a new tenant | ✅ | 🔜 form not built yet |
+| Tenants, equipment and operators registers | ✅ | ✅ |
+| TowerCo site infrastructure (generator, battery, solar) | ✅ | ✅ |
+| Portfolio dashboard with alerts | ✅ | ✅ |
+| Work orders with state machine | ✅ | ✅ |
+| Tower health (telemetry, inspections, work orders) | ✅ | ✅ |
+| Sensor ingestion (Azure Functions) | 🧪 demo | n/a |
+| Sign-in, map view, EF migrations | 🔜 | 🔜 |
+
+## 🧭 Architecture
+
+### Domain model
+
+```mermaid
+erDiagram
+    SITE ||--|| TOWER : "carries one"
+    TOWER ||--o{ TENANCY : "leases slots"
+    OPERATOR ||--o{ TENANCY : holds
+    TENANCY ||--o{ EQUIPMENT : "owns"
+    EQUIPMENT_TYPE ||--o{ EQUIPMENT : classifies
+    TOWER ||--o{ SITE_INFRASTRUCTURE : "TowerCo power kit"
+    SITE ||--o{ WORK_ORDER : has
+    SITE ||--o{ SENSOR_READING : reports
+    SITE ||--o{ INSPECTION : has
+```
+
+Capacity is slot based: a tower has `MaxTenants` slots, and the `Tower` aggregate checks every day of a new or renewed lease so it can never be oversold.
+
+### Layers
 
 ```mermaid
 flowchart LR
@@ -101,17 +126,17 @@ flowchart LR
 
 Full detail: [Backend architecture](docs/architecture/2026-11-02_19-06-37_backend-architecture.md) and [UI architecture](docs/architecture/2026-11-02_19-06-37_ui-architecture.md).
 
-## Target architecture (proposed)
+### Target architecture (proposed)
 
 > **Proposed, not approved.** How the system grows from today's sites and tenancies app into a platform that reads tower sensors, raises alarms and runs work orders to closure. Interactive version: [docs/2026-11-02_13-15-06_target-architecture.html](docs/2026-11-02_13-15-06_target-architecture.html). Agreed scope lives in [CLAUDE.md](CLAUDE.md). Sites, operators and readings are fictional.
 
 Legend used below: **built** = in the code today, **proposed** = design only.
 
-<details open>
+<details>
 <summary><b>1. System view: from tower sensor to technician and back</b></summary>
 
 ```mermaid
-flowchart LR
+flowchart TB
     subgraph Field["Field (tower site)"]
         SENS[Tower sensors<br/>power, battery, generator,<br/>shelter climate, door,<br/>aviation light, tilt]
         GW[Site gateway<br/>edge RTU, MQTT over cellular]
@@ -169,7 +194,7 @@ Cross-cutting: Entra ID sign-in and roles, Key Vault, Application Insights and A
 <summary><b>2. Telemetry: one reading, three paths</b></summary>
 
 ```mermaid
-flowchart LR
+flowchart TB
     R[Sensor reading] --> FN[TelemetryIngest]
     FN -->|hot: rule breach| AS[(alarm-state<br/>one active alarm per tower and sensor, ETag)]
     AS --> BUS[[Service Bus: AlarmRaised]]
@@ -192,7 +217,7 @@ flowchart LR
 
 ```mermaid
 stateDiagram-v2
-    direction LR
+    direction TB
     [*] --> AlarmRaised
     AlarmRaised --> Open: Critical auto-opens
     Open --> Triaged
@@ -243,7 +268,7 @@ Notification rule: an alarm on tenant equipment notifies that operator; an alarm
 <summary><b>5. Delivery order</b></summary>
 
 ```mermaid
-flowchart LR
+flowchart TB
     P1["Phase 1 (now)<br/>Portfolio and leasing<br/>React + API + SQLite"]:::built
     P5["Phase 5<br/>Monitoring<br/>sensors, alarms, health page"]:::proposed
     P6["Phase 6<br/>Work orders<br/>state machine, SLA, assignment"]:::proposed
@@ -259,7 +284,7 @@ Phases 5 and 6 need no Azure services: the simulator calls the API and an in-pro
 
 **Open questions:** per-country data residency; build work orders in-house or integrate an existing maintenance system; auto-open on Critical only or also repeated Warnings.
 
-## Tech stack
+## 🧰 Tech stack
 
 | Layer | Technology |
 |-------|------------|
@@ -269,7 +294,7 @@ Phases 5 and 6 need no Azure services: the simulator calls the API and an in-pro
 | Client | React 19, React Router 7, TypeScript, Vite 8, oxlint |
 | Tests | xUnit, coverlet, `Microsoft.AspNetCore.Mvc.Testing` |
 
-## Repository layout
+## 📁 Repository layout
 
 ```text
 TowerCo_Mgmt/
@@ -285,7 +310,7 @@ TowerCo_Mgmt/
 └── TowerCo_Mgmt.slnx          Solution file (all seven projects)
 ```
 
-## Getting started
+## 🚀 Quick start
 
 ### Prerequisites
 
@@ -304,7 +329,10 @@ The server uses the ASP.NET Core SPA proxy, so starting the API also starts the 
 dotnet run --project TowerCo_Mgmt.Server --launch-profile https
 ```
 
-Open `https://localhost:57138`. Details of each option, ports and the database follow.
+Open `https://localhost:57138`. The database is created and seeded on first run.
+
+<details>
+<summary><b>More: setup options, ports and database</b></summary>
 
 #### First-time setup (clean clone)
 
@@ -375,7 +403,7 @@ If you change an API port, also update the proxy target (see `ASPNETCORE_HTTPS_P
 | Connection string | `ConnectionStrings:TowerCoDb` in `TowerCo_Mgmt.Server/appsettings.json`, default `Data Source=towerco.db` |
 | Created by | API startup: schema via EF Core `EnsureCreated`, then `DatabaseSeeder` fills fictional data if the database is empty |
 | Seed content | 12 sites across India, South Africa, Kenya and Nigeria, 9 operators, 8 equipment types, plus tenancies, equipment, work orders, inspections and 30 days of simulated sensor readings |
-| Version control | Ignored by `.gitignore` (`*.db`); never commit it |
+| Version control | A seeded copy is committed so a clean clone runs at once; delete it to re-seed |
 | Tests | Use SQLite in-memory databases, never the file above |
 
 Common tasks:
@@ -386,7 +414,12 @@ Common tasks:
 - **Inspect the data**: open the file with any SQLite browser (for example DB Browser for SQLite or the VS Code SQLite extension). Stop the API first if you plan to edit rows.
 - **Missing connection string**: the API fails at startup with `MissingConfigurationException` naming `ConnectionStrings:TowerCoDb`.
 
-## Configuration
+</details>
+
+## ⚙️ Configuration
+
+<details>
+<summary><b>Server, client and ingestion settings</b></summary>
 
 ASP.NET Core reads `appsettings.json`, then `appsettings.{Environment}.json`, then environment variables. Any key can be overridden with an environment variable by replacing `:` with `__`, for example `Health__TelemetryWindowDays=14`.
 
@@ -432,7 +465,9 @@ Restart `npm run dev` after editing `.env`; Vite reads it only at start-up.
 
 Threshold values in configuration are fictional starting values for discussion, not taken from an industry standard. No secrets are stored in this repository: never put a real IoT Hub or storage connection string in `local.settings.json` or `.env`; use user secrets or environment variables instead.
 
-## Testing
+</details>
+
+## 🧪 Testing
 
 ```bash
 dotnet build TowerCo_Mgmt.slnx
@@ -446,12 +481,13 @@ dotnet test TowerCo_Mgmt.slnx
 cd towerco_mgmt.client && npm run build && npm run lint
 ```
 
-Backend tests cover domain rules (capacity, duplicate tenancy, active site, work order transitions, health signals), application services against a seeded SQLite in-memory database, persistence mappings, the exception handler and the ingestion functions. Latest run (2 November 2026): 108 tests, 0 failed. The client has no automated tests yet.
+Backend tests cover domain rules (capacity, duplicate tenancy, active site, work order transitions, health signals), application services against a seeded SQLite in-memory database, persistence mappings, the exception handler and the ingestion functions. Latest run (3 November 2026): 156 tests, 0 failed. The client has no automated tests yet.
 
-## Documentation
+## 📚 Documentation
 
 | Document | Contents |
 |----------|----------|
+| [Demo video (4K)](docs/media/2026-11-03_09-29-19_towerco-demo-4k.mp4) | Walkthrough of the running app |
 | [Backend architecture](docs/architecture/2026-11-02_19-06-37_backend-architecture.md) | Layers, entity model, business rules, API reference, persistence, ingestion |
 | [UI architecture](docs/architecture/2026-11-02_19-06-37_ui-architecture.md) | Client structure, routing, data access, mock switch, conventions |
 | [Requirements overview](docs/2026-11-02_12-08-38_requirements-overview.html) | Visual requirements brief |
@@ -459,21 +495,21 @@ Backend tests cover domain rules (capacity, duplicate tenancy, active site, work
 | [Demo deck](docs/2026-11-02_12-48-28_towerco-demo-deck.html) | Walkthrough slides with speaker notes |
 | [CLAUDE.md](CLAUDE.md) | Single source of truth for scope, decisions and progress |
 
-## Roadmap
+## 🗺️ Roadmap
 
 | Phase | Scope |
 |-------|-------|
-| 1 | Sites, site detail, add tenant, register site, portfolio overview (current) |
-| 2 | Edit site and tower, status transitions, equipment create, edit and remove |
+| 1 | Sites, site detail, register site, portfolio overview, lifecycle and lease actions (current) |
+| 2 | Add tenant form, edit tower details, equipment create, edit and remove |
 | 3 | Map view coloured by utilisation, drill-down, trends |
 | 4 | Role-based views, end tenancy, audit history, Azure App Service and Azure SQL |
 | 5 to 8 | Tower health page, alarm-driven work orders, Azure IoT rollout, enterprise integration (all proposed, not approved) |
 
-## Engineering standards
+## 📐 Engineering standards
 
 - Clean Architecture and SOLID; controllers stay thin.
 - Custom domain exceptions; no generic exceptions for business failures.
-- No hardcoded constants: `Constants/` classes on the backend, `src/constants/` on the client, options in `appsettings.json`.
+- No hardcoded constants: `Constants/` classes on the backend, `constants/` folders per feature and in `src/shared/` on the client, options in `appsettings.json`.
 - Methods kept under 15 lines.
 - New backend code targets 100% unit test coverage; build and tests must pass before merge.
 - No secrets in code, configuration or documentation.
